@@ -6,9 +6,24 @@
 
 ## Build and Install
 
-1. Build a debug APK from Android Studio or with `./gradlew assembleDebug`.
-2. Confirm the merged manifest does not contain `android.permission.INTERNET`.
-3. Install the APK on a device or emulator running Android 8.0+.
+1. Download the APK from [latest GitHub Release](https://github.com/ak-freedom/FakeVPNBreaker/releases/latest).
+2. Install the APK on a device or emulator running Android 8.0+.
+3. For local development builds, build a debug APK from Android Studio or with `./gradlew assembleDebug`.
+4. If building locally, confirm the merged manifest does not contain `android.permission.INTERNET`.
+
+Current release reference:
+
+| Field | Value |
+|-------|-------|
+| Latest tag at documentation update | `v1.0.1` |
+| APK asset | `FakeVpnBreaker-v1.0.1.apk` |
+| Release page | <https://github.com/ak-freedom/FakeVPNBreaker/releases/tag/v1.0.1> |
+
+## Release APK Smoke Test
+
+1. Install `FakeVpnBreaker-v1.0.1.apk` from GitHub Releases.
+2. Open Android app info for FakeVpnBreaker and confirm no internet permission is listed.
+3. Open the app and continue with the permission and VPN flow checks below.
 
 ## First Launch and Permission
 
@@ -65,5 +80,5 @@
 
 ## See Also
 
-- [Getting Started](getting-started.md) — сборка, установка и первый запуск.
+- [Getting Started](getting-started.md) — релизный APK, установка и первый запуск.
 - [Architecture](architecture.md) — структура модулей и ограничения.

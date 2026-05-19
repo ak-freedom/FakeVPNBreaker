@@ -2,7 +2,7 @@
 
 # Getting Started
 
-Эта страница описывает сборку, установку и первый запуск FakeVpnBreaker.
+Эта страница описывает установку готового APK из GitHub Releases, локальную сборку для разработки и первый запуск FakeVpnBreaker.
 
 ## Prerequisites
 
@@ -12,9 +12,26 @@
 | JDK 17 | Gradle и Kotlin compilation |
 | Android 8.0+ device/emulator | Минимальный SDK проекта: `26` |
 
+Для установки готового APK нужен только Android 8.0+ device/emulator. Android Studio, Android SDK и JDK 17 нужны, если вы собираете приложение локально из исходников.
+
 Проект использует Gradle wrapper, поэтому отдельная установка Gradle не требуется.
 
-## Build
+## Recommended Install
+
+1. Откройте [latest GitHub Release](https://github.com/ak-freedom/FakeVPNBreaker/releases/latest).
+2. Скачайте APK из блока `Assets`.
+3. Установите APK на Android 8.0+ устройство.
+4. Откройте FakeVpnBreaker из launcher.
+
+На момент обновления документации latest release - `v1.0.1`, APK asset - `FakeVpnBreaker-v1.0.1.apk`.
+
+Если устройство подключено через Android Debug Bridge (ADB), APK можно установить командой:
+
+```bash
+adb install FakeVpnBreaker-v1.0.1.apk
+```
+
+## Local Debug Build
 
 ```bash
 ./gradlew assembleDebug
@@ -26,9 +43,9 @@ Debug APK будет создан в:
 app/build/outputs/apk/debug/
 ```
 
-## Install
+## Local Install
 
-Установите debug APK на устройство или эмулятор через Android Studio либо `adb install`.
+Установите готовый APK из GitHub Releases либо debug APK на устройство или эмулятор через Android Studio или `adb install`.
 
 Перед ручной проверкой убедитесь, что итоговый manifest не содержит:
 

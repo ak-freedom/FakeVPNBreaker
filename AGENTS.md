@@ -39,7 +39,7 @@ app/                      # Android application module
     res/                  # XML layout/theme/string resources
   src/test/               # focused unit tests для pure Kotlin логики
 docs/
-  getting-started.md      # сборка, установка и первый запуск
+  getting-started.md      # релизный APK, установка и первый запуск
   architecture.md         # структура приложения и ограничения
   verification.md         # manual Android verification checklist
 AGENTS.md                 # карта проекта для агентов
@@ -66,7 +66,7 @@ AGENTS.md                 # карта проекта для агентов
 | Документ | Путь | Описание |
 |----------|------|----------|
 | README | `README.md` | Landing page проекта |
-| Getting Started | `docs/getting-started.md` | Сборка и первый запуск |
+| Getting Started | `docs/getting-started.md` | Релизный APK и первый запуск |
 | Architecture | `docs/architecture.md` | Структура и ограничения |
 | Manual Verification | `docs/verification.md` | Ручной чеклист проверки |
 | Project Description | `.ai-factory/DESCRIPTION.md` | Основные требования к Android-приложению |

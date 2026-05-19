@@ -6,11 +6,15 @@ FakeVpnBreaker использует стандартный Android `VpnService`:
 
 ## Quick Start
 
+Скачайте готовый APK из [latest GitHub Release](https://github.com/ak-freedom/FakeVPNBreaker/releases/latest).
+
+Текущий релизный артефакт: `FakeVpnBreaker-v1.0.1.apk`.
+
 ```bash
-./gradlew assembleDebug
+adb install FakeVpnBreaker-v1.0.1.apk
 ```
 
-Установите APK из `app/build/outputs/apk/debug/`, откройте приложение и выдайте системное VPN-разрешение через кнопку `Request VPN permission`.
+Откройте приложение на Android 8.0+ устройстве и выдайте системное VPN-разрешение через кнопку `Request VPN permission`.
 
 ## Key Features
 
@@ -39,7 +43,7 @@ Extra value: token, shown on the FakeVpnBreaker main screen
 
 | Guide | Description |
 |-------|-------------|
-| [Getting Started](docs/getting-started.md) | Сборка, установка, первый запуск |
+| [Getting Started](docs/getting-started.md) | Релизный APK, установка, первый запуск |
 | [Architecture](docs/architecture.md) | Структура и ключевые ограничения |
 | [Manual Verification](docs/verification.md) | Проверка APK, VPN flow и MacroDroid |
 

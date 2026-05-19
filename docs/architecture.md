@@ -96,5 +96,5 @@ Disallowed log content:
 
 ## See Also
 
-- [Getting Started](getting-started.md) — сборка и первый запуск.
+- [Getting Started](getting-started.md) — релизный APK и первый запуск.
 - [Manual Verification](verification.md) — проверка поведения на устройстве.
