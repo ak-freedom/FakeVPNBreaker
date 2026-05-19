@@ -79,11 +79,20 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: "35.0.0"
 
+      - name: Rename signed release APK
+        id: rename_apk
+        env:
+          SIGNED_RELEASE_FILE: ${{ steps.sign.outputs.signedReleaseFile }}
+        run: |
+          renamed_apk="app/build/outputs/apk/release/FakeVpnBreaker-${RELEASE_TAG}.apk"
+          cp "$SIGNED_RELEASE_FILE" "$renamed_apk"
+          echo "signed_apk=$renamed_apk" >> "$GITHUB_OUTPUT"
+
       - name: Upload signed release APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FakeVpnBreaker-release-signed-apk
-          path: ${{ steps.sign.outputs.signedReleaseFile }}
+          name: FakeVpnBreaker-${{ env.RELEASE_TAG }}-release-apk
+          path: ${{ steps.rename_apk.outputs.signed_apk }}
           if-no-files-found: error
 
       - name: Publish GitHub release
@@ -94,4 +103,4 @@ jobs:
           generate_release_notes: true
           fail_on_unmatched_files: true
           files: |
-            ${{ steps.sign.outputs.signedReleaseFile }}
+            ${{ steps.rename_apk.outputs.signed_apk }}
