@@ -5,6 +5,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.CheckBox
@@ -29,6 +31,8 @@ class MainActivity : Activity() {
     private lateinit var durationSpinner: Spinner
     private lateinit var routingSpinner: Spinner
     private lateinit var closeAfterTriggerCheck: CheckBox
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val pendingLogRefreshes = mutableListOf<Runnable>()
     private var bindingSettings = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,6 +62,11 @@ class MainActivity : Activity() {
         super.onResume()
         eventLogRepository.append(EventSeverity.Debug, "MainActivity refresh onResume")
         refreshUi()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        clearPendingLogRefreshes()
     }
 
     @Deprecated("Deprecated in Android framework; kept to avoid AndroidX dependency.")
@@ -108,7 +117,9 @@ class MainActivity : Activity() {
         findViewById<Button>(R.id.testButton).setOnClickListener {
             eventLogRepository.append(EventSeverity.Info, "Manual test launch requested")
             if (vpnBreakController.hasVpnPermission()) {
-                vpnBreakController.startBreakService()
+                if (vpnBreakController.startBreakService()) {
+                    scheduleServiceLogRefreshes()
+                }
             } else {
                 eventLogRepository.append(EventSeverity.Warn, "Manual test requires VPN permission")
                 vpnBreakController.requestPermission(this, REQUEST_VPN_PERMISSION)
@@ -149,6 +160,24 @@ class MainActivity : Activity() {
         triggerActionText.text = getString(R.string.trigger_action_value, TriggerToken.ACTION_BREAK_VPN)
         triggerTokenText.text = getString(R.string.trigger_token_value, settingsRepository.getTriggerToken())
         logText.text = eventLogRepository.formatForDisplay()
+    }
+
+    private fun refreshLogs() {
+        logText.text = eventLogRepository.formatForDisplay()
+    }
+
+    private fun scheduleServiceLogRefreshes() {
+        clearPendingLogRefreshes()
+        listOf(250L, 1_250L, 2_500L).forEach { delayMillis ->
+            val runnable = Runnable { refreshLogs() }
+            pendingLogRefreshes += runnable
+            mainHandler.postDelayed(runnable, delayMillis)
+        }
+    }
+
+    private fun clearPendingLogRefreshes() {
+        pendingLogRefreshes.forEach(mainHandler::removeCallbacks)
+        pendingLogRefreshes.clear()
     }
 
     private companion object {
