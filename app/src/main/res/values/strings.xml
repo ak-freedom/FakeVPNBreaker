@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">FakeVpnBreaker</string>
+    <string name="foreground_service_subtype">Temporary local dummy VPN used to release the currently active VPN session after user consent.</string>
+    <string name="notification_channel_name">VPN break session</string>
+    <string name="notification_title">FakeVpnBreaker active</string>
+    <string name="notification_text">Temporary dummy VPN is running.</string>
+    <string name="status_permission_granted">VPN permission: granted</string>
+    <string name="status_permission_missing">VPN permission: not granted</string>
+    <string name="request_permission">Request VPN permission</string>
+    <string name="run_test">Run test break</string>
+    <string name="duration_label">Hold duration</string>
+    <string name="routing_label">Routing mode</string>
+    <string name="close_after_trigger">Close TriggerActivity after service start</string>
+    <string name="trigger_setup_label">MacroDroid trigger setup</string>
+    <string name="trigger_action_value">Action: %1$s</string>
+    <string name="trigger_token_label">String extra name: com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN</string>
+    <string name="trigger_token_value">Token: %1$s</string>
+    <string name="copy_trigger_token">Copy trigger token</string>
+    <string name="logs_label">Latest events</string>
+    <string name="clear_logs">Clear logs</string>
+    <string name="routing_full_takeover">Full takeover</string>
+    <string name="routing_local_only">Local only</string>
+</resources>
