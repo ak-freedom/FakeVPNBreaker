@@ -55,6 +55,9 @@ jobs:
       - name: Build release APK
         run: ./gradlew assembleRelease
 
+      - name: Install Android build tools for signing
+        run: sdkmanager "build-tools;35.0.0"
+
       - name: Check signing secrets
         if: ${{ env.ANDROID_SIGNING_KEY == '' || env.ANDROID_KEY_ALIAS == '' || env.ANDROID_KEY_STORE_PASSWORD == '' || env.ANDROID_KEY_PASSWORD == '' }}
         run: |
@@ -71,6 +74,8 @@ jobs:
           alias: ${{ env.ANDROID_KEY_ALIAS }}
           keyStorePassword: ${{ env.ANDROID_KEY_STORE_PASSWORD }}
           keyPassword: ${{ env.ANDROID_KEY_PASSWORD }}
+        env:
+          BUILD_TOOLS_VERSION: "35.0.0"
 
       - name: Upload signed release APK artifact
         uses: actions/upload-artifact@v4
