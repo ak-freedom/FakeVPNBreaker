@@ -32,7 +32,8 @@ app/                      # Android application module
     AndroidManifest.xml   # permissions, Activity и VpnService declarations
     java/com/akfreedom/fakevpnbreaker/
       MainActivity.kt     # основной UI и ручной запуск
-      TriggerActivity.kt  # exported entry point для MacroDroid
+      TriggerReceiver.kt  # recommended exported Broadcast entry point для MacroDroid
+      TriggerActivity.kt  # isolated Activity fallback для MacroDroid
       vpn/                # dummy VPN service и orchestration
       settings/           # допустимые настройки и SharedPreferences repository
       logging/            # локальный ring buffer событий
@@ -58,7 +59,8 @@ AGENTS.md                 # карта проекта для агентов
 | `app/build.gradle.kts` | Android app module configuration |
 | `app/src/main/AndroidManifest.xml` | Android entry points and VPN service declaration |
 | `app/src/main/java/com/akfreedom/fakevpnbreaker/MainActivity.kt` | Main UI and manual break flow |
-| `app/src/main/java/com/akfreedom/fakevpnbreaker/TriggerActivity.kt` | MacroDroid intent entry point |
+| `app/src/main/java/com/akfreedom/fakevpnbreaker/TriggerReceiver.kt` | MacroDroid Broadcast entry point |
+| `app/src/main/java/com/akfreedom/fakevpnbreaker/TriggerActivity.kt` | MacroDroid Activity fallback |
 | `app/src/main/java/com/akfreedom/fakevpnbreaker/vpn/FakeVpnService.kt` | Dummy VPN lifecycle implementation |
 
 ## Документация

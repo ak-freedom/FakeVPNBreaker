@@ -23,12 +23,12 @@
 3. Установите APK на Android 8.0+ устройство.
 4. Откройте FakeVpnBreaker из launcher.
 
-На момент обновления документации latest release - `v1.0.1`, APK asset - `FakeVpnBreaker-v1.0.1.apk`.
+На момент обновления документации latest release - `v1.0.2`, APK asset - `FakeVpnBreaker-v1.0.2.apk`.
 
 Если устройство подключено через Android Debug Bridge (ADB), APK можно установить командой:
 
 ```bash
-adb install FakeVpnBreaker-v1.0.1.apk
+adb install FakeVpnBreaker-v1.0.2.apk
 ```
 
 ## Local Debug Build
@@ -75,16 +75,28 @@ android.permission.INTERNET
 
 ## MacroDroid Setup
 
+Сначала откройте FakeVpnBreaker вручную и выдайте VPN permission через `Request VPN permission`. Broadcast target не открывает UI и не может показать системный consent dialog.
+
 Создайте MacroDroid action, который отправляет explicit intent:
 
 | Field | Value |
 |-------|-------|
+| Target | `Broadcast` |
 | Package | `com.akfreedom.fakevpnbreaker` |
 | Action | `com.akfreedom.fakevpnbreaker.BREAK_VPN` |
 | String extra name | `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN` |
 | String extra value | token, показанный на главном экране приложения |
 
-Если VPN permission уже выдано, `TriggerActivity` быстро делегирует запуск `FakeVpnService` и закрывается. Если permission отсутствует, Android покажет системный VPN consent flow.
+Если VPN permission уже выдано, `TriggerReceiver` делегирует запуск `FakeVpnService` без вывода FakeVpnBreaker на передний план. Если permission отсутствует, Broadcast не открывает UI и пишет предупреждение в локальный лог.
+
+Если Android ограничивает запуск foreground service из Broadcast на конкретном устройстве или сценарии, используйте MacroDroid target `Activity` как fallback с теми же package, action и token extra. Activity fallback может показать системный VPN consent flow, а после завершения изолируется от основной `MainActivity`.
+
+Ожидаемые локальные логи:
+
+- accepted trigger: `Broadcast trigger accepted`, `Broadcast trigger delegated service start`;
+- rejected token: `Broadcast trigger rejected: missing or invalid token`;
+- missing permission: `Broadcast trigger ignored: VPN permission missing`;
+- service start failure: `Broadcast trigger failed to start VPN service`.
 
 ## Verify
 

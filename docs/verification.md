@@ -15,13 +15,13 @@ Current release reference:
 
 | Field | Value |
 |-------|-------|
-| Latest tag at documentation update | `v1.0.1` |
-| APK asset | `FakeVpnBreaker-v1.0.1.apk` |
-| Release page | <https://github.com/ak-freedom/FakeVPNBreaker/releases/tag/v1.0.1> |
+| Latest tag at documentation update | `v1.0.2` |
+| APK asset | `FakeVpnBreaker-v1.0.2.apk` |
+| Release page | <https://github.com/ak-freedom/FakeVPNBreaker/releases/tag/v1.0.2> |
 
 ## Release APK Smoke Test
 
-1. Install `FakeVpnBreaker-v1.0.1.apk` from GitHub Releases.
+1. Install `FakeVpnBreaker-v1.0.2.apk` from GitHub Releases.
 2. Open Android app info for FakeVpnBreaker and confirm no internet permission is listed.
 3. Open the app and continue with the permission and VPN flow checks below.
 
@@ -53,15 +53,26 @@ Current release reference:
 
 ## MacroDroid Trigger
 
-1. In MacroDroid, create an action that sends an explicit intent to package `com.akfreedom.fakevpnbreaker`.
-2. Use action `com.akfreedom.fakevpnbreaker.BREAK_VPN`.
-3. Add a string extra named `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`.
-4. Set the extra value to the token shown on the FakeVpnBreaker main screen.
-5. Run the MacroDroid action.
-6. If VPN permission is already granted, verify FakeVpnBreaker starts the dummy VPN and closes `TriggerActivity` quickly.
-7. If VPN permission is missing, verify Android shows the system VPN consent flow.
-8. Send the same intent without the token and verify the local log records a rejected trigger without starting the service.
-9. Confirm the local log contains trigger received, permission decision, service start delegated, and activity finished events.
+1. Open FakeVpnBreaker once and grant VPN permission manually.
+2. In MacroDroid, create an action that sends an explicit intent with target `Broadcast`.
+3. Set package `com.akfreedom.fakevpnbreaker`.
+4. Use action `com.akfreedom.fakevpnbreaker.BREAK_VPN`.
+5. Add a string extra named `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`.
+6. Set the extra value to the token shown on the FakeVpnBreaker main screen.
+7. Run the MacroDroid action.
+8. Verify FakeVpnBreaker does not come to the foreground while the dummy VPN starts.
+9. Send the same Broadcast without the token and verify the local log records `Broadcast trigger rejected: missing or invalid token` without starting the service.
+10. Revoke or clear VPN permission where possible, send the Broadcast again, and verify the local log records `Broadcast trigger ignored: VPN permission missing` without opening UI.
+11. On Android 12+ / targetSdk 35 devices, if background foreground-service start is blocked, verify the local log records `Broadcast trigger failed to start VPN service`.
+
+## MacroDroid Activity Fallback
+
+1. Configure MacroDroid with target `Activity`, package `com.akfreedom.fakevpnbreaker`, action `com.akfreedom.fakevpnbreaker.BREAK_VPN`, and the same token extra.
+2. Run the fallback action.
+3. If VPN permission is already granted, verify `TriggerActivity` delegates the service start and finishes.
+4. If VPN permission is missing, verify Android shows the system VPN consent flow.
+5. After `TriggerActivity` finishes, verify Android does not bring an existing `MainActivity` task to the foreground.
+6. Confirm the local log contains trigger received, permission decision, service start delegated or failure, and `TriggerActivity finished` when close-after-trigger is enabled.
 
 ## Repeated Triggers and Cleanup
 

@@ -13,6 +13,7 @@ app/
     java/com/akfreedom/fakevpnbreaker/
       MainActivity.kt
       TriggerActivity.kt
+      TriggerReceiver.kt
       SimpleItemSelectedListener.kt
       vpn/
         FakeVpnService.kt
@@ -38,15 +39,16 @@ app/
 | Entry point | Responsibility |
 |-------------|----------------|
 | `MainActivity` | Main UI, permission request, manual test break |
-| `TriggerActivity` | Exported MacroDroid entry point |
+| `TriggerReceiver` | Recommended exported MacroDroid Broadcast entry point; starts only when VPN permission is already granted |
+| `TriggerActivity` | Exported MacroDroid Activity fallback for VPN consent and restricted Broadcast cases |
 | `FakeVpnService` | Dummy VPN lifecycle and cleanup |
 
-`TriggerActivity` is exported intentionally because MacroDroid needs an external intent target. `FakeVpnService` remains non-exported and requires `android.permission.BIND_VPN_SERVICE`.
+`TriggerReceiver` and `TriggerActivity` are exported intentionally because MacroDroid needs external intent targets. Both use the same action and token validation. `TriggerActivity` uses an isolated task so finishing the fallback does not resume an existing `MainActivity`. `FakeVpnService` remains non-exported and requires `android.permission.BIND_VPN_SERVICE`.
 
 ## VPN Flow
 
 ```text
-MainActivity or TriggerActivity
+MainActivity, TriggerReceiver, or TriggerActivity
   -> VpnBreakController
   -> FakeVpnService
   -> VpnService.Builder.establish()

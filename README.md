@@ -8,10 +8,10 @@ FakeVpnBreaker использует стандартный Android `VpnService`:
 
 Скачайте готовый APK из [latest GitHub Release](https://github.com/ak-freedom/FakeVPNBreaker/releases/latest).
 
-Текущий релизный артефакт: `FakeVpnBreaker-v1.0.1.apk`.
+Текущий релизный артефакт: `FakeVpnBreaker-v1.0.2.apk`.
 
 ```bash
-adb install FakeVpnBreaker-v1.0.1.apk
+adb install FakeVpnBreaker-v1.0.2.apk
 ```
 
 Откройте приложение на Android 8.0+ устройстве и выдайте системное VPN-разрешение через кнопку `Request VPN permission`.
@@ -19,7 +19,7 @@ adb install FakeVpnBreaker-v1.0.1.apk
 ## Key Features
 
 - **Manual break flow** — ручной запуск dummy VPN из `MainActivity`.
-- **MacroDroid trigger** — exported `TriggerActivity` принимает action `com.akfreedom.fakevpnbreaker.BREAK_VPN`.
+- **MacroDroid trigger** — exported `TriggerReceiver` принимает Broadcast action `com.akfreedom.fakevpnbreaker.BREAK_VPN`; `TriggerActivity` остается fallback для consent flow.
 - **Token check** — внешний intent должен передать `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`.
 - **Configurable hold duration** — допустимые значения: `300`, `500`, `1000`, `2000`, `5000 ms`.
 - **Routing modes** — `Full takeover` для default route и `Local only` без default route.
@@ -29,13 +29,14 @@ adb install FakeVpnBreaker-v1.0.1.apk
 
 ```text
 MacroDroid explicit intent:
+Target:  Broadcast
 Package: com.akfreedom.fakevpnbreaker
 Action:  com.akfreedom.fakevpnbreaker.BREAK_VPN
 Extra name:  com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN
 Extra value: token, shown on the FakeVpnBreaker main screen
 ```
 
-После запуска FakeVpnBreaker поднимает временный dummy VPN, удерживает его выбранное время и закрывает сервис.
+Перед Broadcast-запуском откройте FakeVpnBreaker один раз и выдайте VPN permission. После принятого Broadcast приложение поднимает временный dummy VPN в фоне, удерживает его выбранное время и закрывает сервис. Если Android блокирует background service start, используйте Activity target как fallback.
 
 ---
 

@@ -1,11 +1,13 @@
 package com.akfreedom.fakevpnbreaker
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import com.akfreedom.fakevpnbreaker.logging.EventLogRepository
 import com.akfreedom.fakevpnbreaker.logging.EventSeverity
 import com.akfreedom.fakevpnbreaker.settings.SettingsRepository
 import com.akfreedom.fakevpnbreaker.settings.TriggerToken
+import com.akfreedom.fakevpnbreaker.settings.TriggerValidationResult
 import com.akfreedom.fakevpnbreaker.vpn.VpnBreakController
 
 class TriggerActivity : Activity() {
@@ -19,20 +21,37 @@ class TriggerActivity : Activity() {
         settingsRepository = SettingsRepository(this, eventLogRepository)
         vpnBreakController = VpnBreakController(this, eventLogRepository)
 
-        val action = intent?.action
-        eventLogRepository.append(EventSeverity.Info, "Trigger received: ${action ?: "missing action"}")
-        if (action != TriggerToken.ACTION_BREAK_VPN) {
-            eventLogRepository.append(EventSeverity.Warn, "Unsupported trigger action")
-            finish()
-            return
-        }
-        if (!TriggerToken.isValid(intent?.getStringExtra(TriggerToken.EXTRA_TRIGGER_TOKEN), settingsRepository.getTriggerToken())) {
-            eventLogRepository.append(EventSeverity.Warn, "[FIX:trigger-auth] Rejected trigger with missing or invalid token")
-            finish()
-            return
-        }
+        processTriggerIntent(intent)
+    }
 
-        handleTrigger()
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        eventLogRepository.append(EventSeverity.Info, "[FIX:trigger-single-task] TriggerActivity received replacement intent")
+        processTriggerIntent(intent)
+    }
+
+    private fun processTriggerIntent(triggerIntent: Intent?) {
+        val action = triggerIntent?.action
+        eventLogRepository.append(EventSeverity.Info, "Trigger received: ${action ?: "missing action"}")
+        when (
+            TriggerToken.validate(
+                action,
+                triggerIntent?.getStringExtra(TriggerToken.EXTRA_TRIGGER_TOKEN),
+            ) {
+                settingsRepository.getTriggerToken()
+            }
+        ) {
+            TriggerValidationResult.Accepted -> handleTrigger()
+            TriggerValidationResult.UnsupportedAction -> {
+                eventLogRepository.append(EventSeverity.Warn, "Unsupported trigger action")
+                finishTriggerActivity()
+            }
+            TriggerValidationResult.InvalidToken -> {
+                eventLogRepository.append(EventSeverity.Warn, "[FIX:trigger-auth] Rejected trigger with missing or invalid token")
+                finishTriggerActivity()
+            }
+        }
     }
 
     @Deprecated("Deprecated in Android framework; kept to avoid AndroidX dependency.")
@@ -69,8 +88,12 @@ class TriggerActivity : Activity() {
     private fun finishIfConfigured() {
         if (settingsRepository.shouldCloseAfterTrigger()) {
             eventLogRepository.append(EventSeverity.Info, "TriggerActivity finished")
-            finish()
+            finishTriggerActivity()
         }
+    }
+
+    private fun finishTriggerActivity() {
+        finishAndRemoveTask()
     }
 
     private companion object {

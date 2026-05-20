@@ -15,7 +15,8 @@
             android:name=".TriggerActivity"
             android:excludeFromRecents="true"
             android:exported="true"
-            android:noHistory="true"
+            android:launchMode="singleTask"
+            android:taskAffinity="com.akfreedom.fakevpnbreaker.trigger"
             android:theme="@style/TriggerTheme">
             <intent-filter>
                 <action android:name="com.akfreedom.fakevpnbreaker.BREAK_VPN" />
@@ -31,6 +32,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver
+            android:name=".TriggerReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.akfreedom.fakevpnbreaker.BREAK_VPN" />
+            </intent-filter>
+        </receiver>
 
         <service
             android:name=".vpn.FakeVpnService"
