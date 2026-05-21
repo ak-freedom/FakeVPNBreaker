@@ -6,6 +6,7 @@ import android.content.Intent
 import com.akfreedom.fakevpnbreaker.logging.EventLogRepository
 import com.akfreedom.fakevpnbreaker.logging.EventSeverity
 import com.akfreedom.fakevpnbreaker.settings.SettingsRepository
+import com.akfreedom.fakevpnbreaker.settings.TriggerActionState
 import com.akfreedom.fakevpnbreaker.settings.TriggerToken
 import com.akfreedom.fakevpnbreaker.settings.TriggerValidationResult
 import com.akfreedom.fakevpnbreaker.vpn.VpnBreakController
@@ -16,8 +17,9 @@ class TriggerReceiver : BroadcastReceiver() {
         val settingsRepository = SettingsRepository(context, eventLogRepository)
         val vpnBreakController = VpnBreakController(context, eventLogRepository)
         val action = intent?.action
+        val actionState = TriggerToken.classifyAction(action)
 
-        eventLogRepository.append(EventSeverity.Debug, "Broadcast trigger received: ${action ?: "missing action"}")
+        eventLogRepository.append(EventSeverity.Debug, "Broadcast trigger received: actionState=${actionState.logValue}")
         when (
             TriggerToken.validate(
                 action,
@@ -27,6 +29,9 @@ class TriggerReceiver : BroadcastReceiver() {
             }
         ) {
             TriggerValidationResult.Accepted -> handleAcceptedTrigger(eventLogRepository, vpnBreakController)
+            TriggerValidationResult.MissingAction -> {
+                eventLogRepository.append(EventSeverity.Warn, "Broadcast trigger rejected: missing action")
+            }
             TriggerValidationResult.UnsupportedAction -> {
                 eventLogRepository.append(EventSeverity.Warn, "Broadcast trigger rejected: unsupported action")
             }
@@ -55,4 +60,11 @@ class TriggerReceiver : BroadcastReceiver() {
             eventLogRepository.append(EventSeverity.Error, "Broadcast trigger failed to start VPN service")
         }
     }
+
+    private val TriggerActionState.logValue: String
+        get() = when (this) {
+            TriggerActionState.Expected -> "expected"
+            TriggerActionState.Missing -> "missing"
+            TriggerActionState.Unsupported -> "unsupported"
+        }
 }

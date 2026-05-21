@@ -16,6 +16,7 @@ class FakeVpnService : VpnService() {
     private val mainHandler = Handler(Looper.getMainLooper())
     private var vpnInterface: ParcelFileDescriptor? = null
     private var cleanupRunnable: Runnable? = null
+    private var foregroundStarted = false
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var eventLogRepository: EventLogRepository
 
@@ -28,7 +29,18 @@ class FakeVpnService : VpnService() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         eventLogRepository.append(EventSeverity.Debug, "FakeVpnService onStartCommand startId=$startId")
-        startForeground(VpnNotification.NOTIFICATION_ID, VpnNotification.create(this))
+        val foregroundStartSucceeded = runCatching {
+            startForeground(VpnNotification.NOTIFICATION_ID, VpnNotification.create(this))
+        }.onFailure { error ->
+            eventLogRepository.append(EventSeverity.Error, "Failed to start foreground VPN notification: ${error.javaClass.simpleName}")
+        }.isSuccess
+
+        if (!foregroundStartSucceeded) {
+            cleanup("Foreground start failed")
+            return Service.START_NOT_STICKY
+        }
+
+        foregroundStarted = true
         startDummySession()
         return Service.START_NOT_STICKY
     }
@@ -106,11 +118,14 @@ class FakeVpnService : VpnService() {
             return
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            stopForeground(STOP_FOREGROUND_REMOVE)
-        } else {
-            @Suppress("DEPRECATION")
-            stopForeground(true)
+        if (foregroundStarted) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(STOP_FOREGROUND_REMOVE)
+            } else {
+                @Suppress("DEPRECATION")
+                stopForeground(true)
+            }
+            foregroundStarted = false
         }
         eventLogRepository.append(EventSeverity.Info, "FakeVpnService stopped")
         stopSelf()

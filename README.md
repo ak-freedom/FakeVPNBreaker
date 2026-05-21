@@ -21,6 +21,7 @@ adb install FakeVpnBreaker-v1.0.3.apk
 - **Manual break flow** — ручной запуск dummy VPN из `MainActivity`.
 - **MacroDroid trigger** — exported `TriggerReceiver` принимает Broadcast action `com.akfreedom.fakevpnbreaker.BREAK_VPN`; `TriggerActivity` остается fallback для consent flow.
 - **Token check** — внешний intent должен передать `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`.
+- **Sanitized trigger logs** — Broadcast и Activity fallback логируют только категории action (`expected`, `missing`, `unsupported`), без raw action и token.
 - **Macro template export** — кнопка `Save MacroDroid macro` сохраняет импортируемый `VPN_OFF.macro` с текущим trigger token.
 - **Configurable hold duration** — допустимые значения: `300`, `500`, `1000`, `2000`, `5000 ms`.
 - **Routing modes** — `Full takeover` для default route и `Local only` без default route.
@@ -63,6 +64,7 @@ Extra value: token, shown on the FakeVpnBreaker main screen
 - Нет внешних серверов, аналитики или телеметрии.
 - Нет чтения установленных приложений, истории трафика, доменов или пакетов.
 - Лог хранится локально и ограничен последними 50 событиями.
+- Логи не должны содержать trigger token, raw unsupported action, generated macro JSON или пользовательский трафик.
 
 ## License
 

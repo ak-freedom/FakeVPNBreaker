@@ -63,7 +63,7 @@ Current release reference:
 8. Confirm the imported action target is `Activity`; the generated macro is the fallback-ready import path, not the recommended manual Broadcast setup.
 9. Add the needed triggers for the target scenario, or edit the bundled example trigger app/package if reusing that trigger.
 10. Run the imported macro with another VPN active and verify the dummy VPN starts.
-11. Confirm the local log includes save requested/saved, trigger receipt, permission decision, service start delegated or service-start failure, dummy VPN closure, and no token or generated macro JSON.
+11. Confirm the local log includes save requested/saved, sanitized trigger receipt, permission decision, service start delegated or service-start failure, dummy VPN closure, and no token or generated macro JSON.
 
 ## MacroDroid Broadcast Trigger
 
@@ -76,8 +76,10 @@ Current release reference:
 7. Run the MacroDroid action.
 8. Verify FakeVpnBreaker does not come to the foreground while the dummy VPN starts.
 9. Send the same Broadcast without the token and verify the local log records `Broadcast trigger rejected: missing or invalid token` without starting the service.
-10. Revoke or clear VPN permission where possible, send the Broadcast again, and verify the local log records `Broadcast trigger ignored: VPN permission missing` without opening UI.
-11. On Android 12+ / targetSdk 35 devices, if background foreground-service start is blocked, verify the local log records `Broadcast trigger failed to start VPN service`.
+10. Send a Broadcast with no action and verify the local log records `Broadcast trigger received: actionState=missing` and `Broadcast trigger rejected: missing action`.
+11. Send a Broadcast with any unsupported action and verify the local log records `Broadcast trigger received: actionState=unsupported` and `Broadcast trigger rejected: unsupported action` without printing the raw action.
+12. Revoke or clear VPN permission where possible, send the valid Broadcast again, and verify the local log records `Broadcast trigger ignored: VPN permission missing` without opening UI.
+13. On Android 12+ / targetSdk 35 devices, if background foreground-service start is blocked, verify the local log records `Broadcast trigger failed to start VPN service`.
 
 ## MacroDroid Activity Fallback
 
@@ -85,9 +87,10 @@ Current release reference:
 2. Run the fallback action.
 3. If VPN permission is already granted, verify `TriggerActivity` delegates the service start and finishes.
 4. If VPN permission is missing, verify Android shows the system VPN consent flow.
-5. After `TriggerActivity` finishes, verify Android does not bring an existing `MainActivity` task to the foreground.
-6. Confirm the local log contains trigger received, permission decision, service start delegated or failure, and `TriggerActivity finished` when close-after-trigger is enabled.
-7. Confirm rejected-token and service-start failure paths are logged without printing the token value.
+5. While the consent flow is visible, send the fallback action again and verify the local log records duplicate handling without launching another consent request.
+6. After `TriggerActivity` finishes, verify Android does not bring an existing `MainActivity` task to the foreground.
+7. Confirm the local log contains sanitized trigger receipt with `actionState=expected`, permission decision, service start delegated or failure, and `TriggerActivity finished` when close-after-trigger is enabled.
+8. Confirm missing-action, unsupported-action, rejected-token, and service-start failure paths are logged without printing the raw action or token value.
 
 ## Repeated Triggers and Cleanup
 
@@ -103,6 +106,7 @@ Current release reference:
 2. Test on Android 13+ without notification permission and verify the VPN service still starts or the app logs a foreground-service start error.
 3. Enable Android Always-on VPN or Block connections without VPN and verify behavior manually; Android policy may prevent interruption or immediate release.
 4. Confirm the local log stores only the latest 50 entries and never includes installed app lists, IP/domain history, packet data, or personal data.
+5. Inspect Logcat with tag `FakeVpnBreaker` during Broadcast and Activity fallback tests. Expected safe categories include `actionState=expected`, `actionState=missing`, and `actionState=unsupported`; token values, generated macro JSON, installed app lists, domains, packet data, and personal data must not appear.
 
 ## See Also
 

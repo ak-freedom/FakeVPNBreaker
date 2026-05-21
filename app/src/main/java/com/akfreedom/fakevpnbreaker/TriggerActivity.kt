@@ -6,6 +6,7 @@ import android.os.Bundle
 import com.akfreedom.fakevpnbreaker.logging.EventLogRepository
 import com.akfreedom.fakevpnbreaker.logging.EventSeverity
 import com.akfreedom.fakevpnbreaker.settings.SettingsRepository
+import com.akfreedom.fakevpnbreaker.settings.TriggerActionState
 import com.akfreedom.fakevpnbreaker.settings.TriggerToken
 import com.akfreedom.fakevpnbreaker.settings.TriggerValidationResult
 import com.akfreedom.fakevpnbreaker.vpn.VpnBreakController
@@ -14,6 +15,7 @@ class TriggerActivity : Activity() {
     private lateinit var eventLogRepository: EventLogRepository
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var vpnBreakController: VpnBreakController
+    private var permissionRequestInProgress = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,13 +29,18 @@ class TriggerActivity : Activity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         setIntent(intent)
-        eventLogRepository.append(EventSeverity.Info, "[FIX:trigger-single-task] TriggerActivity received replacement intent")
+        val actionState = TriggerToken.classifyAction(intent?.action)
+        eventLogRepository.append(
+            EventSeverity.Debug,
+            "[FIX:trigger-single-task] TriggerActivity received replacement intent actionState=${actionState.logValue}",
+        )
         processTriggerIntent(intent)
     }
 
     private fun processTriggerIntent(triggerIntent: Intent?) {
         val action = triggerIntent?.action
-        eventLogRepository.append(EventSeverity.Info, "Trigger received: ${action ?: "missing action"}")
+        val actionState = TriggerToken.classifyAction(action)
+        eventLogRepository.append(EventSeverity.Debug, "TriggerActivity received trigger: actionState=${actionState.logValue}")
         when (
             TriggerToken.validate(
                 action,
@@ -43,8 +50,12 @@ class TriggerActivity : Activity() {
             }
         ) {
             TriggerValidationResult.Accepted -> handleTrigger()
+            TriggerValidationResult.MissingAction -> {
+                eventLogRepository.append(EventSeverity.Warn, "TriggerActivity rejected trigger: missing action")
+                finishTriggerActivity()
+            }
             TriggerValidationResult.UnsupportedAction -> {
-                eventLogRepository.append(EventSeverity.Warn, "Unsupported trigger action")
+                eventLogRepository.append(EventSeverity.Warn, "TriggerActivity rejected trigger: unsupported action")
                 finishTriggerActivity()
             }
             TriggerValidationResult.InvalidToken -> {
@@ -59,6 +70,7 @@ class TriggerActivity : Activity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode != REQUEST_VPN_PERMISSION) return
 
+        permissionRequestInProgress = false
         if (vpnBreakController.hasVpnPermission()) {
             eventLogRepository.append(EventSeverity.Info, "VPN permission granted from trigger")
             vpnBreakController.startBreakService()
@@ -69,6 +81,7 @@ class TriggerActivity : Activity() {
     }
 
     private fun handleTrigger() {
+        eventLogRepository.append(EventSeverity.Info, "TriggerActivity accepted trigger")
         if (vpnBreakController.hasVpnPermission()) {
             eventLogRepository.append(EventSeverity.Info, "Trigger permission already granted")
             val started = vpnBreakController.startBreakService()
@@ -81,8 +94,19 @@ class TriggerActivity : Activity() {
             return
         }
 
+        if (permissionRequestInProgress) {
+            eventLogRepository.append(EventSeverity.Debug, "TriggerActivity ignored duplicate trigger while VPN permission request is in progress")
+            return
+        }
+
+        permissionRequestInProgress = true
         eventLogRepository.append(EventSeverity.Info, "Trigger requesting VPN permission")
-        vpnBreakController.requestPermission(this, REQUEST_VPN_PERMISSION)
+        val requestStarted = vpnBreakController.requestPermission(this, REQUEST_VPN_PERMISSION)
+        if (!requestStarted) {
+            permissionRequestInProgress = false
+            eventLogRepository.append(EventSeverity.Warn, "Trigger permission request skipped before consent flow")
+            finishIfConfigured()
+        }
     }
 
     private fun finishIfConfigured() {
@@ -95,6 +119,13 @@ class TriggerActivity : Activity() {
     private fun finishTriggerActivity() {
         finishAndRemoveTask()
     }
+
+    private val TriggerActionState.logValue: String
+        get() = when (this) {
+            TriggerActionState.Expected -> "expected"
+            TriggerActionState.Missing -> "missing"
+            TriggerActionState.Unsupported -> "unsupported"
+        }
 
     private companion object {
         const val REQUEST_VPN_PERMISSION = 41

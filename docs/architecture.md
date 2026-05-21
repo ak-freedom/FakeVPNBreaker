@@ -43,7 +43,7 @@ app/
 | `TriggerActivity` | Exported MacroDroid Activity fallback for VPN consent and restricted Broadcast cases |
 | `FakeVpnService` | Dummy VPN lifecycle and cleanup |
 
-`TriggerReceiver` and `TriggerActivity` are exported intentionally because MacroDroid needs external intent targets. Both use the same action and token validation. `TriggerActivity` uses an isolated task so finishing the fallback does not resume an existing `MainActivity`. `FakeVpnService` remains non-exported and requires `android.permission.BIND_VPN_SERVICE`.
+`TriggerReceiver` and `TriggerActivity` are exported intentionally because MacroDroid needs external intent targets. Both use the same exact action check, generated trigger token validation, and sanitized action classification for logs. `TriggerActivity` uses an isolated task so finishing the fallback does not resume an existing `MainActivity`; replacement intents are processed through the same validation path. `FakeVpnService` remains non-exported and requires `android.permission.BIND_VPN_SERVICE`.
 
 ## VPN Flow
 
@@ -77,11 +77,14 @@ Allowed log content:
 
 - lifecycle events;
 - permission decisions;
-- trigger validation result;
+- trigger validation result and sanitized action category (`expected`, `missing`, `unsupported`);
 - service start and cleanup events.
 
 Disallowed log content:
 
+- trigger token values;
+- raw unsupported external action strings;
+- generated MacroDroid macro JSON;
 - installed app lists;
 - traffic history;
 - packet data;
