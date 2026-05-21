@@ -1,5 +1,7 @@
 package com.akfreedom.fakevpnbreaker.macrodroid
 
+import com.akfreedom.fakevpnbreaker.logging.DiagnosticCatalog
+import com.akfreedom.fakevpnbreaker.logging.DiagnosticCode
 import java.nio.file.Path
 import kotlin.io.path.readText
 import org.junit.Assert.assertEquals
@@ -105,5 +107,28 @@ class MacroTemplateRendererTest {
         val content = (result as MacroTemplateRenderResult.Success).content
         assertEquals(token, content)
         assertFalse(content.contains(MacroTemplateRenderer.TOKEN_PLACEHOLDER))
+    }
+
+    @Test
+    fun macroExportDiagnosticsDoNotIncludeGeneratedMacroUriOrRawExceptionMessage() {
+        val unsafeValues = listOf(
+            "token-123",
+            """{"m_extra1Value":"token-123"}""",
+            "content://downloads/private/VPN_OFF.macro",
+            "raw exception message",
+        )
+        val messages = listOf(
+            DiagnosticCatalog.message(DiagnosticCode.MacroTemplateFailed).text,
+            DiagnosticCatalog.message(DiagnosticCode.MacroMissingUri).text,
+            DiagnosticCatalog.message(DiagnosticCode.MacroOutputUnavailable).text,
+            DiagnosticCatalog.message(DiagnosticCode.MacroWriteFailed, "IOException").text,
+            DiagnosticCatalog.message(DiagnosticCode.MacroPermissionDenied).text,
+        )
+
+        messages.forEach { message ->
+            unsafeValues.forEach { unsafeValue ->
+                assertFalse(message.contains(unsafeValue))
+            }
+        }
     }
 }

@@ -1,5 +1,7 @@
 package com.akfreedom.fakevpnbreaker.settings
 
+import com.akfreedom.fakevpnbreaker.logging.DiagnosticCatalog
+import com.akfreedom.fakevpnbreaker.logging.DiagnosticCode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -108,5 +110,21 @@ class TriggerTokenTest {
         assertEquals(TriggerActionState.Expected, TriggerToken.classifyAction(TriggerToken.ACTION_BREAK_VPN))
         assertEquals(TriggerActionState.Missing, TriggerToken.classifyAction(null))
         assertEquals(TriggerActionState.Unsupported, TriggerToken.classifyAction("untrusted-action"))
+    }
+
+    @Test
+    fun triggerRejectionDiagnosticsDoNotIncludeTokenOrRawAction() {
+        val token = "secret-token-123"
+        val unsupportedAction = "com.example.UNTRUSTED_ACTION"
+        val messages = listOf(
+            DiagnosticCatalog.message(DiagnosticCode.InvalidTriggerToken).text,
+            DiagnosticCatalog.message(DiagnosticCode.MissingTriggerAction).text,
+            DiagnosticCatalog.message(DiagnosticCode.UnsupportedTriggerAction).text,
+        )
+
+        messages.forEach { message ->
+            assertFalse(message.contains(token))
+            assertFalse(message.contains(unsupportedAction))
+        }
     }
 }

@@ -5,7 +5,7 @@
     <string name="notification_title">FakeVpnBreaker active</string>
     <string name="notification_text">Temporary dummy VPN is running.</string>
     <string name="status_permission_granted">VPN permission: granted</string>
-    <string name="status_permission_missing">VPN permission: not granted</string>
+    <string name="status_permission_missing">VPN permission: not granted. Request permission before running a break.</string>
     <string name="request_permission">Request VPN permission</string>
     <string name="run_test">Run test break</string>
     <string name="duration_label">Hold duration</string>

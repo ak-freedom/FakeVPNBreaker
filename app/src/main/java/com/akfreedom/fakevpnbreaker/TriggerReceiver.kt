@@ -3,10 +3,11 @@ package com.akfreedom.fakevpnbreaker
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.akfreedom.fakevpnbreaker.logging.DiagnosticCatalog
+import com.akfreedom.fakevpnbreaker.logging.DiagnosticCode
 import com.akfreedom.fakevpnbreaker.logging.EventLogRepository
 import com.akfreedom.fakevpnbreaker.logging.EventSeverity
 import com.akfreedom.fakevpnbreaker.settings.SettingsRepository
-import com.akfreedom.fakevpnbreaker.settings.TriggerActionState
 import com.akfreedom.fakevpnbreaker.settings.TriggerToken
 import com.akfreedom.fakevpnbreaker.settings.TriggerValidationResult
 import com.akfreedom.fakevpnbreaker.vpn.VpnBreakController
@@ -19,7 +20,10 @@ class TriggerReceiver : BroadcastReceiver() {
         val action = intent?.action
         val actionState = TriggerToken.classifyAction(action)
 
-        eventLogRepository.append(EventSeverity.Debug, "Broadcast trigger received: actionState=${actionState.logValue}")
+        eventLogRepository.append(
+            EventSeverity.Debug,
+            "Broadcast trigger received: actionState=${DiagnosticCatalog.triggerActionLogValue(actionState)}",
+        )
         when (
             TriggerToken.validate(
                 action,
@@ -30,13 +34,13 @@ class TriggerReceiver : BroadcastReceiver() {
         ) {
             TriggerValidationResult.Accepted -> handleAcceptedTrigger(eventLogRepository, vpnBreakController)
             TriggerValidationResult.MissingAction -> {
-                eventLogRepository.append(EventSeverity.Warn, "Broadcast trigger rejected: missing action")
+                eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.MissingTriggerAction))
             }
             TriggerValidationResult.UnsupportedAction -> {
-                eventLogRepository.append(EventSeverity.Warn, "Broadcast trigger rejected: unsupported action")
+                eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.UnsupportedTriggerAction))
             }
             TriggerValidationResult.InvalidToken -> {
-                eventLogRepository.append(EventSeverity.Warn, "Broadcast trigger rejected: missing or invalid token")
+                eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.InvalidTriggerToken))
             }
         }
     }
@@ -45,26 +49,19 @@ class TriggerReceiver : BroadcastReceiver() {
         eventLogRepository: EventLogRepository,
         vpnBreakController: VpnBreakController,
     ) {
-        eventLogRepository.append(EventSeverity.Info, "Broadcast trigger accepted")
+        eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.BroadcastAccepted))
         val hasPermission = vpnBreakController.hasVpnPermission()
         eventLogRepository.append(EventSeverity.Debug, "Broadcast trigger VPN permission granted=$hasPermission")
         if (!hasPermission) {
-            eventLogRepository.append(EventSeverity.Warn, "Broadcast trigger ignored: VPN permission missing")
+            eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.MissingVpnPermission))
             return
         }
 
         val started = vpnBreakController.startBreakService()
         if (started) {
-            eventLogRepository.append(EventSeverity.Info, "Broadcast trigger delegated service start")
+            eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.ServiceDelegated))
         } else {
-            eventLogRepository.append(EventSeverity.Error, "Broadcast trigger failed to start VPN service")
+            eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.ServiceStartFailed))
         }
     }
-
-    private val TriggerActionState.logValue: String
-        get() = when (this) {
-            TriggerActionState.Expected -> "expected"
-            TriggerActionState.Missing -> "missing"
-            TriggerActionState.Unsupported -> "unsupported"
-        }
 }

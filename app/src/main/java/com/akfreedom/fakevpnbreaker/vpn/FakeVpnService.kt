@@ -7,6 +7,8 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.ParcelFileDescriptor
+import com.akfreedom.fakevpnbreaker.logging.DiagnosticCatalog
+import com.akfreedom.fakevpnbreaker.logging.DiagnosticCode
 import com.akfreedom.fakevpnbreaker.logging.EventLogRepository
 import com.akfreedom.fakevpnbreaker.logging.EventSeverity
 import com.akfreedom.fakevpnbreaker.settings.RoutingMode
@@ -32,7 +34,9 @@ class FakeVpnService : VpnService() {
         val foregroundStartSucceeded = runCatching {
             startForeground(VpnNotification.NOTIFICATION_ID, VpnNotification.create(this))
         }.onFailure { error ->
-            eventLogRepository.append(EventSeverity.Error, "Failed to start foreground VPN notification: ${error.javaClass.simpleName}")
+            eventLogRepository.append(
+                DiagnosticCatalog.message(DiagnosticCode.ForegroundStartFailed, error.javaClass.simpleName),
+            )
         }.isSuccess
 
         if (!foregroundStartSucceeded) {
@@ -54,7 +58,7 @@ class FakeVpnService : VpnService() {
     private fun startDummySession() {
         val previousInterface = vpnInterface
         if (previousInterface != null) {
-            eventLogRepository.append(EventSeverity.Warn, "Repeated start received; replacing active dummy VPN session")
+            eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.RepeatedStart))
             cleanup("Repeated start cleanup", stopService = false)
         }
 
@@ -78,7 +82,7 @@ class FakeVpnService : VpnService() {
 
             val establishedInterface = builder.establish()
             if (establishedInterface == null) {
-                eventLogRepository.append(EventSeverity.Error, "VPN establish returned null")
+                eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.VpnEstablishFailed))
                 cleanup("VPN establish failed")
                 return
             }
@@ -87,7 +91,9 @@ class FakeVpnService : VpnService() {
             eventLogRepository.append(EventSeverity.Info, "Dummy VPN established")
             scheduleCleanup(duration.millis)
         }.onFailure { error ->
-            eventLogRepository.append(EventSeverity.Error, "Failed to start dummy VPN: ${error.javaClass.simpleName}")
+            eventLogRepository.append(
+                DiagnosticCatalog.message(DiagnosticCode.VpnEstablishFailed, error.javaClass.simpleName),
+            )
             cleanup("VPN start exception")
         }
     }

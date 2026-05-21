@@ -20,6 +20,10 @@ class EventLogRepository(context: Context) {
         writeLogcat(severity, message)
     }
 
+    fun append(diagnosticMessage: DiagnosticMessage) {
+        append(diagnosticMessage.severity, diagnosticMessage.text)
+    }
+
     fun getNewestFirst(): List<EventLog> = readEventsOldestFirst().asReversed()
 
     fun clear() {

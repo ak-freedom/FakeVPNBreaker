@@ -42,7 +42,7 @@ Extra value: token, shown on the FakeVpnBreaker main screen
 
 Если Android блокирует background service start, используйте MacroDroid target `Activity` как fallback с теми же package, action и token extra. Activity fallback может показать системный VPN consent flow, а после завершения изолируется от основной `MainActivity`.
 
-Чтобы не копировать intent-поля вручную, нажмите `Save MacroDroid macro` на главном экране FakeVpnBreaker. Android откроет системный выбор места сохранения, а приложение запишет `VPN_OFF.macro` с текущим `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`. Ожидаемые локальные логи: `MacroDroid macro save requested`, `MacroDroid macro saved`, `MacroDroid macro save cancelled` или безопасное сообщение `MacroDroid macro save failed: ...`.
+Чтобы не копировать intent-поля вручную, нажмите `Save MacroDroid macro` на главном экране FakeVpnBreaker. Android откроет системный выбор места сохранения, а приложение запишет `VPN_OFF.macro` с текущим `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`. Ожидаемые локальные логи: `MacroDroid macro save requested`, `MacroDroid macro saved`, `MacroDroid macro export cancelled` или безопасные recovery-сообщения про picker/template/output/write/permission failure.
 
 Импорт сохраненного `VPN_OFF.macro` проверен на реальном устройстве: MacroDroid принимает файл, сохраняет action с package/action/token extra и запускает FakeVpnBreaker после настройки нужных триггеров. Шаблон использует Activity fallback и пример триггера запуска приложения `Пятёрочка`; после импорта добавьте или замените триггеры в MacroDroid под свой сценарий. Broadcast остается рекомендуемым фоновым вариантом для ручной настройки explicit intent.
 
@@ -65,6 +65,10 @@ Extra value: token, shown on the FakeVpnBreaker main screen
 - Нет чтения установленных приложений, истории трафика, доменов или пакетов.
 - Лог хранится локально и ограничен последними 50 событиями.
 - Логи не должны содержать trigger token, raw unsupported action, generated macro JSON или пользовательский трафик.
+
+## Recovery Diagnostics
+
+Локальный лог использует фиксированные безопасные категории. Типовые состояния: missing VPN permission с подсказкой открыть FakeVpnBreaker и выдать permission, invalid trigger token без значения token, unsupported action без raw action, foreground/service start failure с рекомендацией Activity fallback, VPN establish failure, repeated start replacement и MacroDroid export failures без URI, document path или generated `.macro` content.
 
 ## License
 

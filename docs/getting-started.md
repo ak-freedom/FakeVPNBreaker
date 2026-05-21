@@ -87,8 +87,12 @@ android.permission.INTERNET
 
 - save requested: `MacroDroid macro save requested`;
 - saved: `MacroDroid macro saved`;
-- cancelled picker: `MacroDroid macro save cancelled`;
-- failed render/write: `MacroDroid macro save failed: ...`.
+- cancelled picker: `MacroDroid macro export cancelled`;
+- missing URI: `MacroDroid macro export did not return a document; choose a save location and retry`;
+- picker launch failure: `MacroDroid document picker could not be opened; retry export from FakeVpnBreaker`;
+- template/render failure: `MacroDroid macro export failed: bundled template could not be prepared`;
+- output stream unavailable: `MacroDroid macro export target is unavailable; choose another save location`;
+- write or permission failure: safe write/permission messages without URI, document path, token, generated `.macro` content, or raw exception message.
 
 Для фонового Broadcast-варианта можно настроить MacroDroid action вручную.
 
@@ -109,13 +113,15 @@ android.permission.INTERNET
 Ожидаемые локальные логи:
 
 - received trigger: `Broadcast trigger received: actionState=expected`;
-- accepted trigger: `Broadcast trigger accepted`, `Broadcast trigger delegated service start`;
-- missing/unsupported action: `Broadcast trigger rejected: missing action` or `Broadcast trigger rejected: unsupported action`;
-- rejected token: `Broadcast trigger rejected: missing or invalid token`;
-- missing permission: `Broadcast trigger ignored: VPN permission missing`;
-- service start failure: `Broadcast trigger failed to start VPN service`.
+- accepted trigger: `Broadcast trigger accepted; starting dummy VPN if permission is already granted`, `VPN break service start delegated`;
+- missing/unsupported action: safe messages beginning with `Trigger rejected: missing action` or `Trigger rejected: unsupported action`;
+- rejected token: `Trigger rejected: missing or invalid token; update the MacroDroid extra from FakeVpnBreaker`;
+- missing permission: `VPN permission missing; open FakeVpnBreaker and grant VPN permission before triggering again`;
+- service start failure: `VPN break service start failed; try the Activity fallback`.
 
-Для Activity fallback ожидаемые логи включают sanitized trigger receipt (`actionState=expected`, `actionState=missing` или `actionState=unsupported`), permission decision, service start delegation или service-start failure, а также `TriggerActivity finished` при включенном закрытии fallback activity. Значение token, raw external action при отказе и содержимое `.macro` в лог не выводятся.
+Для Activity fallback ожидаемые логи включают sanitized trigger receipt (`actionState=expected`, `actionState=missing` или `actionState=unsupported`), waiting-for-consent state, permission granted/denied state, duplicate trigger handling while consent is active, service start delegation или service-start failure, а также `TriggerActivity finished after trigger handling` при включенном закрытии fallback activity. Значение token, raw external action при отказе и содержимое `.macro` в лог не выводятся.
+
+Manual flow diagnostics use the same recovery language: if VPN permission is missing, request it from the main screen; if Android cannot open the VPN consent UI, retry from FakeVpnBreaker; if foreground service startup or dummy VPN establishment fails, use the local log category to distinguish notification/start failure from VPN establish failure. Repeated starts are logged as replacement of the active dummy VPN session.
 
 ## Verify
 

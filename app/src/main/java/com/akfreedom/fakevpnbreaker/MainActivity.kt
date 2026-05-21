@@ -14,6 +14,8 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.Spinner
 import android.widget.TextView
+import com.akfreedom.fakevpnbreaker.logging.DiagnosticCatalog
+import com.akfreedom.fakevpnbreaker.logging.DiagnosticCode
 import com.akfreedom.fakevpnbreaker.logging.EventLogRepository
 import com.akfreedom.fakevpnbreaker.logging.EventSeverity
 import com.akfreedom.fakevpnbreaker.macrodroid.MacroTemplateRenderResult
@@ -121,9 +123,11 @@ class MainActivity : Activity() {
             if (vpnBreakController.hasVpnPermission()) {
                 if (vpnBreakController.startBreakService()) {
                     scheduleServiceLogRefreshes()
+                } else {
+                    eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.ServiceStartFailed))
                 }
             } else {
-                eventLogRepository.append(EventSeverity.Warn, "Manual test requires VPN permission")
+                eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.MissingVpnPermission))
                 vpnBreakController.requestPermission(this, REQUEST_VPN_PERMISSION)
             }
             refreshUi()
@@ -174,9 +178,9 @@ class MainActivity : Activity() {
 
     private fun handleVpnPermissionResult() {
         if (vpnBreakController.hasVpnPermission()) {
-            eventLogRepository.append(EventSeverity.Info, "VPN permission granted")
+            eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.VpnPermissionGranted))
         } else {
-            eventLogRepository.append(EventSeverity.Warn, "VPN permission missing after consent flow")
+            eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.VpnPermissionDenied))
         }
         refreshUi()
     }
@@ -188,20 +192,29 @@ class MainActivity : Activity() {
             type = MACRO_DOCUMENT_MIME_TYPE
             putExtra(Intent.EXTRA_TITLE, MACRO_DOCUMENT_NAME)
         }
-        startActivityForResult(intent, REQUEST_CREATE_MACRO_DOCUMENT)
+        runCatching {
+            startActivityForResult(intent, REQUEST_CREATE_MACRO_DOCUMENT)
+        }.onFailure { error ->
+            eventLogRepository.append(
+                DiagnosticCatalog.message(
+                    DiagnosticCode.MacroPickerLaunchFailed,
+                    error.javaClass.simpleName,
+                ),
+            )
+        }
         refreshUi()
     }
 
     private fun handleMacroDocumentResult(resultCode: Int, data: Intent?) {
         if (resultCode != RESULT_OK) {
-            eventLogRepository.append(EventSeverity.Info, "MacroDroid macro save cancelled")
+            eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.MacroSaveCancelled))
             refreshUi()
             return
         }
 
         val uri = data?.data
         if (uri == null) {
-            eventLogRepository.append(EventSeverity.Warn, "MacroDroid macro save failed: missing document URI")
+            eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.MacroMissingUri))
             refreshUi()
             return
         }
@@ -214,13 +227,15 @@ class MainActivity : Activity() {
         val template = try {
             readMacroTemplate()
         } catch (exception: IOException) {
-            eventLogRepository.append(EventSeverity.Error, "MacroDroid macro save failed: template read error")
+            eventLogRepository.append(
+                DiagnosticCatalog.message(DiagnosticCode.MacroTemplateFailed, exception.javaClass.simpleName),
+            )
             return
         }
 
         val rendered = MacroTemplateRenderer.render(template, settingsRepository.getTriggerToken())
         if (rendered is MacroTemplateRenderResult.Failure) {
-            eventLogRepository.append(EventSeverity.Error, "MacroDroid macro save failed: ${rendered.message}")
+            eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.MacroTemplateFailed))
             return
         }
 
@@ -228,7 +243,7 @@ class MainActivity : Activity() {
         try {
             val outputStream = contentResolver.openOutputStream(uri)
             if (outputStream == null) {
-                eventLogRepository.append(EventSeverity.Warn, "MacroDroid macro save failed: document output stream unavailable")
+                eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.MacroOutputUnavailable))
                 return
             }
             outputStream.use {
@@ -236,9 +251,11 @@ class MainActivity : Activity() {
             }
             eventLogRepository.append(EventSeverity.Info, "MacroDroid macro saved")
         } catch (exception: IOException) {
-            eventLogRepository.append(EventSeverity.Error, "MacroDroid macro save failed: document write error")
+            eventLogRepository.append(
+                DiagnosticCatalog.message(DiagnosticCode.MacroWriteFailed, exception.javaClass.simpleName),
+            )
         } catch (exception: SecurityException) {
-            eventLogRepository.append(EventSeverity.Error, "MacroDroid macro save failed: document permission denied")
+            eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.MacroPermissionDenied))
         }
     }
 

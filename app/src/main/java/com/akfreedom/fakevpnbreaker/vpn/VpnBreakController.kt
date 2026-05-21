@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.os.Build
+import com.akfreedom.fakevpnbreaker.logging.DiagnosticCatalog
+import com.akfreedom.fakevpnbreaker.logging.DiagnosticCode
 import com.akfreedom.fakevpnbreaker.logging.EventLogRepository
 import com.akfreedom.fakevpnbreaker.logging.EventSeverity
 
@@ -21,16 +23,26 @@ class VpnBreakController(
 
     fun hasVpnPermission(): Boolean = prepareVpnIntent() == null
 
-    fun requestPermission(activity: Activity, requestCode: Int): Boolean {
+    fun requestPermission(activity: Activity, requestCode: Int): VpnPermissionRequestResult {
         val prepareIntent = prepareVpnIntent()
         if (prepareIntent == null) {
             eventLogRepository.append(EventSeverity.Info, "VPN permission already granted")
-            return false
+            return VpnPermissionRequestResult.AlreadyGranted
         }
 
-        eventLogRepository.append(EventSeverity.Info, "VPN permission request started")
-        activity.startActivityForResult(prepareIntent, requestCode)
-        return true
+        eventLogRepository.append(DiagnosticCatalog.message(DiagnosticCode.VpnPermissionRequestStarted))
+        return runCatching {
+            activity.startActivityForResult(prepareIntent, requestCode)
+            VpnPermissionRequestResult.Started
+        }.getOrElse { error ->
+            eventLogRepository.append(
+                DiagnosticCatalog.message(
+                    DiagnosticCode.VpnPermissionLaunchFailed,
+                    error.javaClass.simpleName,
+                ),
+            )
+            VpnPermissionRequestResult.LaunchFailed
+        }
     }
 
     fun startBreakService(): Boolean {
@@ -45,8 +57,16 @@ class VpnBreakController(
             eventLogRepository.append(EventSeverity.Info, "VPN break service start requested")
             true
         }.getOrElse { error ->
-            eventLogRepository.append(EventSeverity.Error, "Failed to start VPN service: ${error.javaClass.simpleName}")
+            eventLogRepository.append(
+                DiagnosticCatalog.message(DiagnosticCode.ServiceStartFailed, error.javaClass.simpleName),
+            )
             false
         }
     }
+}
+
+enum class VpnPermissionRequestResult {
+    AlreadyGranted,
+    Started,
+    LaunchFailed,
 }
