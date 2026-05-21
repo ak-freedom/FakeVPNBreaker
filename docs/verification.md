@@ -60,8 +60,10 @@ Current release reference:
 5. Repeat the save flow and cancel the picker; verify the local log records `MacroDroid macro save cancelled` without an error state or crash.
 6. Import the saved `VPN_OFF.macro` into MacroDroid.
 7. Confirm the imported intent contains package `com.akfreedom.fakevpnbreaker`, action `com.akfreedom.fakevpnbreaker.BREAK_VPN`, extra name `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`, and an extra value matching the current app token.
-8. Edit the imported trigger app/package in MacroDroid if the macro should launch from a different app than the bundled example.
-9. Run the imported macro with another VPN active and verify the dummy VPN starts.
+8. Confirm the imported action target is `Activity`; the generated macro is the fallback-ready import path, not the recommended manual Broadcast setup.
+9. Add the needed triggers for the target scenario, or edit the bundled example trigger app/package if reusing that trigger.
+10. Run the imported macro with another VPN active and verify the dummy VPN starts.
+11. Confirm the local log includes save requested/saved, trigger receipt, permission decision, service start delegated or service-start failure, dummy VPN closure, and no token or generated macro JSON.
 
 ## MacroDroid Broadcast Trigger
 
@@ -85,6 +87,7 @@ Current release reference:
 4. If VPN permission is missing, verify Android shows the system VPN consent flow.
 5. After `TriggerActivity` finishes, verify Android does not bring an existing `MainActivity` task to the foreground.
 6. Confirm the local log contains trigger received, permission decision, service start delegated or failure, and `TriggerActivity finished` when close-after-trigger is enabled.
+7. Confirm rejected-token and service-start failure paths are logged without printing the token value.
 
 ## Repeated Triggers and Cleanup
 

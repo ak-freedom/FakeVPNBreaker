@@ -43,9 +43,9 @@ Extra value: token, shown on the FakeVpnBreaker main screen
 
 Чтобы не копировать intent-поля вручную, нажмите `Save MacroDroid macro` на главном экране FakeVpnBreaker. Android откроет системный выбор места сохранения, а приложение запишет `VPN_OFF.macro` с текущим `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`. Ожидаемые локальные логи: `MacroDroid macro save requested`, `MacroDroid macro saved`, `MacroDroid macro save cancelled` или безопасное сообщение `MacroDroid macro save failed: ...`.
 
-Импортируйте сохраненный файл в MacroDroid. Шаблон использует Activity fallback и пример trigger app `Пятёрочка`; после импорта измените trigger app/package в MacroDroid, если макрос должен срабатывать от другого приложения. Broadcast остается рекомендуемым фоновым вариантом для ручной настройки explicit intent.
+Импорт сохраненного `VPN_OFF.macro` проверен на реальном устройстве: MacroDroid принимает файл, сохраняет action с package/action/token extra и запускает FakeVpnBreaker после настройки нужных триггеров. Шаблон использует Activity fallback и пример триггера запуска приложения `Пятёрочка`; после импорта добавьте или замените триггеры в MacroDroid под свой сценарий. Broadcast остается рекомендуемым фоновым вариантом для ручной настройки explicit intent.
 
-Статический пример также доступен в [examples/VPN_OFF.macro](examples/VPN_OFF.macro), но в нем token нужно заменить вручную.
+Статический пример также доступен в [examples/VPN_OFF.macro](examples/VPN_OFF.macro), но в нем токен нужно заменить вручную.
 
 ---
 

@@ -77,9 +77,11 @@ android.permission.INTERNET
 
 Сначала откройте FakeVpnBreaker вручную и выдайте VPN permission через `Request VPN permission`. Broadcast target не открывает UI и не может показать системный consent dialog.
 
-Самый быстрый вариант - нажать `Save MacroDroid macro` на главном экране FakeVpnBreaker. Android откроет системный document picker; сохраните файл как `VPN_OFF.macro`, затем импортируйте его в MacroDroid. Сохраненный файл уже содержит текущий token из FakeVpnBreaker в extra `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`, поэтому копировать token вручную не нужно.
+Самый быстрый вариант - нажать `Save MacroDroid macro` на главном экране FakeVpnBreaker. Android откроет системный document picker; сохраните файл как `VPN_OFF.macro`, затем импортируйте его в MacroDroid. Сохраненный файл уже содержит текущий токен из FakeVpnBreaker в extra `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`, поэтому копировать токен вручную не нужно.
 
-Импортируемый шаблон использует Activity fallback и пример trigger app `Пятёрочка`. После импорта откройте trigger в MacroDroid и замените приложение/пакет, если макрос должен запускаться для другого приложения. Intent action, package и token extra можно оставить как есть.
+Импорт сохраненного `VPN_OFF.macro` проверен на реальном устройстве: MacroDroid принимает файл, а импортированный action сохраняет package `com.akfreedom.fakevpnbreaker`, action `com.akfreedom.fakevpnbreaker.BREAK_VPN` и token extra `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`.
+
+Импортируемый шаблон использует Activity fallback и пример trigger app `Пятёрочка`. После импорта добавьте нужные триггеры или откройте существующий триггер в MacroDroid и замените приложение/пакет, если макрос должен запускаться для другого сценария. Intent action, package и token extra можно оставить как есть.
 
 Ожидаемые локальные логи для export flow:
 
@@ -110,6 +112,8 @@ android.permission.INTERNET
 - rejected token: `Broadcast trigger rejected: missing or invalid token`;
 - missing permission: `Broadcast trigger ignored: VPN permission missing`;
 - service start failure: `Broadcast trigger failed to start VPN service`.
+
+Для Activity fallback ожидаемые логи включают trigger receipt, permission decision, service start delegation или service-start failure, а также `TriggerActivity finished` при включенном закрытии fallback activity. Значение token и содержимое `.macro` в лог не выводятся.
 
 ## Verify
 
