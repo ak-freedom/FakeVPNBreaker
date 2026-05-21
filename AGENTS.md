@@ -34,15 +34,19 @@ app/                      # Android application module
       MainActivity.kt     # основной UI и ручной запуск
       TriggerReceiver.kt  # recommended exported Broadcast entry point для MacroDroid
       TriggerActivity.kt  # isolated Activity fallback для MacroDroid
+      macrodroid/         # pure MacroDroid template rendering
       vpn/                # dummy VPN service и orchestration
       settings/           # допустимые настройки и SharedPreferences repository
       logging/            # локальный ring buffer событий
+    assets/macrodroid/    # bundled MacroDroid template asset
     res/                  # XML layout/theme/string resources
   src/test/               # focused unit tests для pure Kotlin логики
 docs/
   getting-started.md      # релизный APK, установка и первый запуск
   architecture.md         # структура приложения и ограничения
   verification.md         # manual Android verification checklist
+examples/
+  VPN_OFF.macro           # пример MacroDroid-макроса для Activity fallback
 AGENTS.md                 # карта проекта для агентов
 ```
 
@@ -61,6 +65,7 @@ AGENTS.md                 # карта проекта для агентов
 | `app/src/main/java/com/akfreedom/fakevpnbreaker/MainActivity.kt` | Main UI and manual break flow |
 | `app/src/main/java/com/akfreedom/fakevpnbreaker/TriggerReceiver.kt` | MacroDroid Broadcast entry point |
 | `app/src/main/java/com/akfreedom/fakevpnbreaker/TriggerActivity.kt` | MacroDroid Activity fallback |
+| `app/src/main/java/com/akfreedom/fakevpnbreaker/macrodroid/MacroTemplateRenderer.kt` | Pure renderer for bundled MacroDroid macro templates |
 | `app/src/main/java/com/akfreedom/fakevpnbreaker/vpn/FakeVpnService.kt` | Dummy VPN lifecycle implementation |
 
 ## Документация

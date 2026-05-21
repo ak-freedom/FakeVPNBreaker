@@ -23,12 +23,12 @@
 3. Установите APK на Android 8.0+ устройство.
 4. Откройте FakeVpnBreaker из launcher.
 
-На момент обновления документации latest release - `v1.0.2`, APK asset - `FakeVpnBreaker-v1.0.2.apk`.
+На момент обновления документации latest release - `v1.0.3`, APK asset - `FakeVpnBreaker-v1.0.3.apk`.
 
 Если устройство подключено через Android Debug Bridge (ADB), APK можно установить командой:
 
 ```bash
-adb install FakeVpnBreaker-v1.0.2.apk
+adb install FakeVpnBreaker-v1.0.3.apk
 ```
 
 ## Local Debug Build
@@ -76,6 +76,19 @@ android.permission.INTERNET
 ## MacroDroid Setup
 
 Сначала откройте FakeVpnBreaker вручную и выдайте VPN permission через `Request VPN permission`. Broadcast target не открывает UI и не может показать системный consent dialog.
+
+Самый быстрый вариант - нажать `Save MacroDroid macro` на главном экране FakeVpnBreaker. Android откроет системный document picker; сохраните файл как `VPN_OFF.macro`, затем импортируйте его в MacroDroid. Сохраненный файл уже содержит текущий token из FakeVpnBreaker в extra `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`, поэтому копировать token вручную не нужно.
+
+Импортируемый шаблон использует Activity fallback и пример trigger app `Пятёрочка`. После импорта откройте trigger в MacroDroid и замените приложение/пакет, если макрос должен запускаться для другого приложения. Intent action, package и token extra можно оставить как есть.
+
+Ожидаемые локальные логи для export flow:
+
+- save requested: `MacroDroid macro save requested`;
+- saved: `MacroDroid macro saved`;
+- cancelled picker: `MacroDroid macro save cancelled`;
+- failed render/write: `MacroDroid macro save failed: ...`.
+
+Для фонового Broadcast-варианта можно настроить MacroDroid action вручную.
 
 Создайте MacroDroid action, который отправляет explicit intent:
 

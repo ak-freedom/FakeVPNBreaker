@@ -16,6 +16,7 @@
     <string name="trigger_token_label">String extra name: com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN</string>
     <string name="trigger_token_value">Token: %1$s</string>
     <string name="copy_trigger_token">Copy trigger token</string>
+    <string name="save_macrodroid_macro">Save MacroDroid macro</string>
     <string name="logs_label">Latest events</string>
     <string name="clear_logs">Clear logs</string>
     <string name="routing_full_takeover">Full takeover</string>

@@ -120,6 +120,13 @@
             android:text="@string/copy_trigger_token" />
 
         <Button
+            android:id="@+id/saveMacroButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/save_macrodroid_macro" />
+
+        <Button
             android:id="@+id/clearLogsButton"
             android:layout_width="match_parent"
             android:layout_height="48dp"

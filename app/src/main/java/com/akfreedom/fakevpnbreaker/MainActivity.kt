@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -14,11 +16,15 @@ import android.widget.Spinner
 import android.widget.TextView
 import com.akfreedom.fakevpnbreaker.logging.EventLogRepository
 import com.akfreedom.fakevpnbreaker.logging.EventSeverity
+import com.akfreedom.fakevpnbreaker.macrodroid.MacroTemplateRenderResult
+import com.akfreedom.fakevpnbreaker.macrodroid.MacroTemplateRenderer
 import com.akfreedom.fakevpnbreaker.settings.BreakDuration
 import com.akfreedom.fakevpnbreaker.settings.RoutingMode
 import com.akfreedom.fakevpnbreaker.settings.SettingsRepository
 import com.akfreedom.fakevpnbreaker.settings.TriggerToken
 import com.akfreedom.fakevpnbreaker.vpn.VpnBreakController
+import java.io.IOException
+import java.nio.charset.StandardCharsets
 
 class MainActivity : Activity() {
     private lateinit var settingsRepository: SettingsRepository
@@ -70,16 +76,12 @@ class MainActivity : Activity() {
     }
 
     @Deprecated("Deprecated in Android framework; kept to avoid AndroidX dependency.")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode != REQUEST_VPN_PERMISSION) return
-
-        if (vpnBreakController.hasVpnPermission()) {
-            eventLogRepository.append(EventSeverity.Info, "VPN permission granted")
-        } else {
-            eventLogRepository.append(EventSeverity.Warn, "VPN permission missing after consent flow")
+        when (requestCode) {
+            REQUEST_VPN_PERMISSION -> handleVpnPermissionResult()
+            REQUEST_CREATE_MACRO_DOCUMENT -> handleMacroDocumentResult(resultCode, data)
         }
-        refreshUi()
     }
 
     private fun setupDurationSpinner() {
@@ -144,6 +146,10 @@ class MainActivity : Activity() {
             eventLogRepository.append(EventSeverity.Info, "[FIX:trigger-auth] Trigger token copied for MacroDroid setup")
             refreshUi()
         }
+
+        findViewById<Button>(R.id.saveMacroButton).setOnClickListener {
+            requestMacroDocumentSave()
+        }
     }
 
     private fun bindSettings() {
@@ -166,6 +172,81 @@ class MainActivity : Activity() {
         logText.text = eventLogRepository.formatForDisplay()
     }
 
+    private fun handleVpnPermissionResult() {
+        if (vpnBreakController.hasVpnPermission()) {
+            eventLogRepository.append(EventSeverity.Info, "VPN permission granted")
+        } else {
+            eventLogRepository.append(EventSeverity.Warn, "VPN permission missing after consent flow")
+        }
+        refreshUi()
+    }
+
+    private fun requestMacroDocumentSave() {
+        eventLogRepository.append(EventSeverity.Info, "MacroDroid macro save requested")
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = MACRO_DOCUMENT_MIME_TYPE
+            putExtra(Intent.EXTRA_TITLE, MACRO_DOCUMENT_NAME)
+        }
+        startActivityForResult(intent, REQUEST_CREATE_MACRO_DOCUMENT)
+        refreshUi()
+    }
+
+    private fun handleMacroDocumentResult(resultCode: Int, data: Intent?) {
+        if (resultCode != RESULT_OK) {
+            eventLogRepository.append(EventSeverity.Info, "MacroDroid macro save cancelled")
+            refreshUi()
+            return
+        }
+
+        val uri = data?.data
+        if (uri == null) {
+            eventLogRepository.append(EventSeverity.Warn, "MacroDroid macro save failed: missing document URI")
+            refreshUi()
+            return
+        }
+
+        saveMacroDocument(uri)
+        refreshUi()
+    }
+
+    private fun saveMacroDocument(uri: Uri) {
+        val template = try {
+            readMacroTemplate()
+        } catch (exception: IOException) {
+            eventLogRepository.append(EventSeverity.Error, "MacroDroid macro save failed: template read error")
+            return
+        }
+
+        val rendered = MacroTemplateRenderer.render(template, settingsRepository.getTriggerToken())
+        if (rendered is MacroTemplateRenderResult.Failure) {
+            eventLogRepository.append(EventSeverity.Error, "MacroDroid macro save failed: ${rendered.message}")
+            return
+        }
+
+        val content = (rendered as MacroTemplateRenderResult.Success).content
+        try {
+            val outputStream = contentResolver.openOutputStream(uri)
+            if (outputStream == null) {
+                eventLogRepository.append(EventSeverity.Warn, "MacroDroid macro save failed: document output stream unavailable")
+                return
+            }
+            outputStream.use {
+                it.write(content.toByteArray(StandardCharsets.UTF_8))
+            }
+            eventLogRepository.append(EventSeverity.Info, "MacroDroid macro saved")
+        } catch (exception: IOException) {
+            eventLogRepository.append(EventSeverity.Error, "MacroDroid macro save failed: document write error")
+        } catch (exception: SecurityException) {
+            eventLogRepository.append(EventSeverity.Error, "MacroDroid macro save failed: document permission denied")
+        }
+    }
+
+    private fun readMacroTemplate(): String =
+        assets.open(MACRO_TEMPLATE_ASSET).bufferedReader(StandardCharsets.UTF_8).use { reader ->
+            reader.readText()
+        }
+
     private fun scheduleServiceLogRefreshes() {
         clearPendingLogRefreshes()
         listOf(250L, 1_250L, 2_500L).forEach { delayMillis ->
@@ -182,5 +263,9 @@ class MainActivity : Activity() {
 
     private companion object {
         const val REQUEST_VPN_PERMISSION = 40
+        const val REQUEST_CREATE_MACRO_DOCUMENT = 41
+        const val MACRO_DOCUMENT_NAME = "VPN_OFF.macro"
+        const val MACRO_DOCUMENT_MIME_TYPE = "application/octet-stream"
+        const val MACRO_TEMPLATE_ASSET = "macrodroid/VPN_OFF.template.macro"
     }
 }

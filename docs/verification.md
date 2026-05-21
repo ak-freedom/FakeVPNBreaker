@@ -15,13 +15,13 @@ Current release reference:
 
 | Field | Value |
 |-------|-------|
-| Latest tag at documentation update | `v1.0.2` |
-| APK asset | `FakeVpnBreaker-v1.0.2.apk` |
-| Release page | <https://github.com/ak-freedom/FakeVPNBreaker/releases/tag/v1.0.2> |
+| Latest tag at documentation update | `v1.0.3` |
+| APK asset | `FakeVpnBreaker-v1.0.3.apk` |
+| Release page | <https://github.com/ak-freedom/FakeVPNBreaker/releases/tag/v1.0.3> |
 
 ## Release APK Smoke Test
 
-1. Install `FakeVpnBreaker-v1.0.2.apk` from GitHub Releases.
+1. Install `FakeVpnBreaker-v1.0.3.apk` from GitHub Releases.
 2. Open Android app info for FakeVpnBreaker and confirm no internet permission is listed.
 3. Open the app and continue with the permission and VPN flow checks below.
 
@@ -52,6 +52,18 @@ Current release reference:
 4. Verify settings persist after closing and reopening the app.
 
 ## MacroDroid Trigger
+
+1. Open FakeVpnBreaker once and grant VPN permission manually.
+2. Tap `Save MacroDroid macro`.
+3. Save the suggested `VPN_OFF.macro` through the Android document picker.
+4. Verify the local log records `MacroDroid macro save requested` and `MacroDroid macro saved`.
+5. Repeat the save flow and cancel the picker; verify the local log records `MacroDroid macro save cancelled` without an error state or crash.
+6. Import the saved `VPN_OFF.macro` into MacroDroid.
+7. Confirm the imported intent contains package `com.akfreedom.fakevpnbreaker`, action `com.akfreedom.fakevpnbreaker.BREAK_VPN`, extra name `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`, and an extra value matching the current app token.
+8. Edit the imported trigger app/package in MacroDroid if the macro should launch from a different app than the bundled example.
+9. Run the imported macro with another VPN active and verify the dummy VPN starts.
+
+## MacroDroid Broadcast Trigger
 
 1. Open FakeVpnBreaker once and grant VPN permission manually.
 2. In MacroDroid, create an action that sends an explicit intent with target `Broadcast`.
