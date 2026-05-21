@@ -86,6 +86,14 @@ class MacroTemplateRendererTest {
     }
 
     @Test
+    fun failureMessagesDoNotIncludeTriggerToken() {
+        val result = MacroTemplateRenderer.render("""{"m_extra1Value":"ADD TOKEN"}""", "token-123")
+
+        assertTrue(result is MacroTemplateRenderResult.Failure)
+        assertFalse((result as MacroTemplateRenderResult.Failure).message.contains("token-123"))
+    }
+
+    @Test
     fun doesNotModifyTokenValue() {
         val token = " token:123/ABC "
         val result = MacroTemplateRenderer.render(

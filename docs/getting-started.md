@@ -108,12 +108,14 @@ android.permission.INTERNET
 
 Ожидаемые локальные логи:
 
+- received trigger: `Broadcast trigger received: actionState=expected`;
 - accepted trigger: `Broadcast trigger accepted`, `Broadcast trigger delegated service start`;
+- missing/unsupported action: `Broadcast trigger rejected: missing action` or `Broadcast trigger rejected: unsupported action`;
 - rejected token: `Broadcast trigger rejected: missing or invalid token`;
 - missing permission: `Broadcast trigger ignored: VPN permission missing`;
 - service start failure: `Broadcast trigger failed to start VPN service`.
 
-Для Activity fallback ожидаемые логи включают trigger receipt, permission decision, service start delegation или service-start failure, а также `TriggerActivity finished` при включенном закрытии fallback activity. Значение token и содержимое `.macro` в лог не выводятся.
+Для Activity fallback ожидаемые логи включают sanitized trigger receipt (`actionState=expected`, `actionState=missing` или `actionState=unsupported`), permission decision, service start delegation или service-start failure, а также `TriggerActivity finished` при включенном закрытии fallback activity. Значение token, raw external action при отказе и содержимое `.macro` в лог не выводятся.
 
 ## Verify
 
