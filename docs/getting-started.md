@@ -58,26 +58,26 @@ android.permission.INTERNET
 ## First Launch
 
 1. Откройте FakeVpnBreaker из launcher.
-2. Нажмите `Request VPN permission`.
+2. Нажмите `Запросить VPN-разрешение` / `Request VPN permission`.
 3. Подтвердите системный Android VPN consent dialog.
-4. Вернитесь в приложение и проверьте статус `VPN permission: granted`.
+4. Вернитесь в приложение и проверьте статус `VPN-разрешение: выдано` / `VPN permission: granted`.
 
 Разрешение выдается Android через `VpnService.prepare(...)`; приложение не обходит этот системный сценарий.
 
 ## Manual Break
 
 1. Запустите другой VPN-клиент или Android VPN profile.
-2. В FakeVpnBreaker выберите длительность, например `1000 ms`.
-3. Выберите режим маршрутизации.
-4. Нажмите `Run test break`.
+2. В FakeVpnBreaker в поле `Длительность удержания` / `Hold duration` выберите значение, например `1000 ms`.
+3. В поле `Режим маршрутизации` / `Routing mode` выберите режим.
+4. Нажмите `Запустить тест` / `Run test break`.
 5. Проверьте, что Android кратковременно переключает активный VPN на FakeVpnBreaker.
 6. Дождитесь окончания выбранного интервала и убедитесь, что FakeVpnBreaker больше не активен как VPN.
 
 ## MacroDroid Setup
 
-Сначала откройте FakeVpnBreaker вручную и выдайте VPN-разрешение через `Request VPN permission`. Broadcast target не открывает UI и не может показать системный consent dialog.
+Сначала откройте FakeVpnBreaker вручную и выдайте VPN-разрешение через `Запросить VPN-разрешение` / `Request VPN permission`. Broadcast target не открывает UI и не может показать системный consent dialog.
 
-Самый быстрый вариант - нажать `Save MacroDroid macro` на главном экране FakeVpnBreaker. Android откроет системный document picker; сохраните файл как `VPN_OFF.macro`, затем импортируйте его в MacroDroid. Сохраненный файл уже содержит текущий токен из FakeVpnBreaker в extra `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`, поэтому копировать токен вручную не нужно.
+Самый быстрый вариант - нажать `Сохранить макрос MacroDroid` / `Save MacroDroid macro` на главном экране FakeVpnBreaker. Android откроет системный document picker; сохраните файл как `VPN_OFF.macro`, затем импортируйте его в MacroDroid. Сохраненный файл уже содержит текущий токен из FakeVpnBreaker в extra `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`, поэтому копировать токен вручную не нужно.
 
 Импорт сохраненного `VPN_OFF.macro` проверен на реальном устройстве: MacroDroid принимает файл, а импортированный action сохраняет package `com.akfreedom.fakevpnbreaker`, action `com.akfreedom.fakevpnbreaker.BREAK_VPN` и token extra `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`.
 
@@ -104,7 +104,7 @@ android.permission.INTERNET
 | Package | `com.akfreedom.fakevpnbreaker` |
 | Action | `com.akfreedom.fakevpnbreaker.BREAK_VPN` |
 | String extra name | `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN` |
-| String extra value | токен, показанный на главном экране приложения |
+| `Токен` / `Token` или String extra value | токен, показанный на главном экране приложения |
 
 Если VPN-разрешение уже выдано, `TriggerReceiver` делегирует запуск `FakeVpnService` без вывода FakeVpnBreaker на передний план. Если разрешение отсутствует, Broadcast не открывает UI и пишет предупреждение в локальный журнал.
 

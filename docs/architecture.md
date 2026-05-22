@@ -71,10 +71,10 @@ MainActivity, TriggerReceiver, or TriggerActivity
 
 | Setting | Allowed values |
 |---------|----------------|
-| Hold duration | `300`, `500`, `1000`, `2000`, `5000 ms` |
-| Routing mode | `Full takeover`, `Local only` |
-| UI language | `English`, `Russian` |
-| Trigger token | Generated local token for MacroDroid intent validation |
+| `Длительность удержания` / `Hold duration` | `300`, `500`, `1000`, `2000`, `5000 ms` |
+| `Режим маршрутизации` / `Routing mode` | `Full takeover`, `Local only` |
+| `Язык` / `Language` | `Английский` / `English`, `Русский` / `Russian` |
+| `Токен` / `Token` | Generated local token for MacroDroid intent validation |
 
 Settings are stored in `SharedPreferences` through `SettingsRepository` and narrow helpers in `settings/`. `BreakDuration` and `RoutingMode` remain stable storage/domain enum values; localized labels are built in the UI from string resources. The selected UI language is applied before `setContentView` through the native Android `Configuration`/`Locale` path and changing it recreates `MainActivity`.
 

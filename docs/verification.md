@@ -28,17 +28,17 @@ Current release reference:
 ## First Launch and Permission
 
 1. Open FakeVpnBreaker from the launcher.
-2. Verify the screen shows VPN permission as missing.
-3. Tap `Request VPN permission`.
+2. Verify the screen shows VPN permission as missing: `VPN-разрешение не выдано. Запросите разрешение перед запуском.` / `VPN permission: not granted. Request permission before running a break.`
+3. Tap `Запросить VPN-разрешение` / `Request VPN permission`.
 4. Accept the Android system VPN consent dialog.
-5. Return to the app and verify the screen shows VPN permission as granted.
+5. Return to the app and verify the screen shows VPN permission as granted: `VPN-разрешение: выдано` / `VPN permission: granted`.
 6. Confirm the local log contains permission request/grant events only, without app names, traffic, domains, or device identifiers.
 
 ## Manual Break Flow
 
 1. Start another VPN app or Android VPN profile.
-2. In FakeVpnBreaker, select `1000 ms` and `Full takeover`.
-3. Tap `Run test break`.
+2. In FakeVpnBreaker, select `1000 ms` in `Длительность удержания` / `Hold duration` and `Full takeover` in `Режим маршрутизации` / `Routing mode`.
+3. Tap `Запустить тест` / `Run test break`.
 4. Verify Android briefly switches the active VPN to FakeVpnBreaker.
 5. Wait for the selected hold duration.
 6. Verify FakeVpnBreaker closes the VPN session and no longer remains active.
@@ -49,19 +49,19 @@ Current release reference:
 1. Select each supported duration: `300`, `500`, `1000`, `2000`, and `5000 ms`.
 2. Run a manual break after each selection and verify the session roughly matches the selected hold duration.
 3. Switch between `Full takeover` and `Local only`.
-4. Open the help popup for hold duration, routing mode, close-after-trigger, and MacroDroid setup; confirm the text explains the effect of each setting without showing the trigger token.
+4. Open the help popup for `Длительность удержания` / `Hold duration`, `Режим маршрутизации` / `Routing mode`, `Закрывать TriggerActivity после запуска сервиса` / `Close TriggerActivity after service start`, and `Настройка триггера MacroDroid` / `MacroDroid trigger setup`; confirm the text explains the effect of each setting without showing the trigger token.
 5. Verify settings persist after closing and reopening the app.
 
 ## Language Selector
 
-1. Switch the UI language from English to Russian and back.
+1. Switch the UI language with `Язык` / `Language` from `Английский` / `English` to `Русский` / `Russian` and back.
 2. Confirm headings, buttons, spinner labels, checkbox text, status text, help popup titles/messages, and the empty-log fallback are translated.
 3. Confirm existing local event log messages remain as originally recorded and are not rewritten during language switching.
 
 ## MacroDroid Trigger
 
 1. Open FakeVpnBreaker once and grant VPN permission manually.
-2. Tap `Save MacroDroid macro`.
+2. Tap `Сохранить макрос MacroDroid` / `Save MacroDroid macro`.
 3. Save the suggested `VPN_OFF.macro` through the Android document picker.
 4. Verify the local log records `MacroDroid macro save requested` and `MacroDroid macro saved`.
 5. Repeat the save flow and cancel the picker; verify the local log records `MacroDroid macro export cancelled` without an error state or crash.
@@ -104,7 +104,7 @@ Current release reference:
 1. From the main screen, trigger VPN permission request on a device/profile where Android cannot open the consent UI, if available.
 2. Verify the local log records `VPN permission screen could not be opened; retry from FakeVpnBreaker` and does not claim the user denied consent.
 3. From Activity fallback, repeat the same permission-launch failure scenario and verify the fallback finishes according to the close-after-trigger setting.
-4. Disable or restrict the document picker if the test environment allows it, tap `Save MacroDroid macro`, and verify the local log records `MacroDroid document picker could not be opened; retry export from FakeVpnBreaker`.
+4. Disable or restrict the document picker if the test environment allows it, tap `Сохранить макрос MacroDroid` / `Save MacroDroid macro`, and verify the local log records `MacroDroid document picker could not be opened; retry export from FakeVpnBreaker`.
 5. Confirm none of these logs include intent payloads, URI values, token values, or raw exception messages.
 
 ## Repeated Triggers and Cleanup

@@ -14,14 +14,14 @@ FakeVpnBreaker использует стандартный Android `VpnService`:
 adb install FakeVpnBreaker-v1.1.0.apk
 ```
 
-Откройте приложение на Android 8.0+ устройстве и выдайте системное VPN-разрешение через кнопку `Request VPN permission`.
+Откройте приложение на Android 8.0+ устройстве и выдайте системное VPN-разрешение через кнопку `Запросить VPN-разрешение` / `Request VPN permission`.
 
 ## Настройки на главном экране
 
-- `Hold duration` задает, сколько времени временный dummy VPN остается активным перед закрытием. Более длинное значение может помочь Android надежнее переключиться с предыдущего VPN.
-- `Routing mode` определяет, какой трафик Android на короткое время направит через FakeVpnBreaker: `Full takeover` перехватывает весь трафик устройства, `Local only` запускает более узкий локальный VPN.
-- `Close TriggerActivity after service start` закрывает временный экран `TriggerActivity` после запуска сервиса. Для автоматизации через MacroDroid настройку лучше оставить включенной.
-- `MacroDroid trigger setup` содержит сохранение импортируемого `.macro` и explicit intent поля для защищенного токеном внешнего триггера. Кнопка `Save MacroDroid macro` находится первой в этом разделе, чтобы основной сценарий настройки был виден сразу.
+- `Длительность удержания` / `Hold duration` задает, сколько времени временный dummy VPN остается активным перед закрытием. Более длинное значение может помочь Android надежнее переключиться с предыдущего VPN.
+- `Режим маршрутизации` / `Routing mode` определяет, какой трафик Android на короткое время направит через FakeVpnBreaker: `Full takeover` перехватывает весь трафик устройства, `Local only` запускает более узкий локальный VPN.
+- `Закрывать TriggerActivity после запуска сервиса` / `Close TriggerActivity after service start` закрывает временный экран `TriggerActivity` после запуска сервиса. Для автоматизации через MacroDroid настройку лучше оставить включенной.
+- `Настройка триггера MacroDroid` / `MacroDroid trigger setup` содержит сохранение импортируемого `.macro` и explicit intent поля для защищенного токеном внешнего триггера. Кнопка `Сохранить макрос MacroDroid` / `Save MacroDroid macro` находится первой в этом разделе, чтобы основной сценарий настройки был виден сразу.
 
 ## Настройка MacroDroid
 
@@ -38,7 +38,7 @@ Extra value: token shown on the FakeVpnBreaker main screen
 
 Если Android блокирует фоновый запуск сервиса, используйте MacroDroid target `Activity` с теми же package, action и token extra. Такой запуск открывает `TriggerActivity`, может показать системный экран VPN-разрешения, а после завершения изолируется от основной `MainActivity`.
 
-Чтобы не копировать intent-поля вручную, нажмите `Save MacroDroid macro` на главном экране FakeVpnBreaker. Android откроет системный выбор места сохранения, а приложение запишет `VPN_OFF.macro` с текущим `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`. Ожидаемые записи локального журнала: `MacroDroid macro save requested`, `MacroDroid macro saved`, `MacroDroid macro export cancelled` или безопасные сообщения восстановления для picker/template/output/write/permission failure.
+Чтобы не копировать intent-поля вручную, нажмите `Сохранить макрос MacroDroid` / `Save MacroDroid macro` на главном экране FakeVpnBreaker. Android откроет системный выбор места сохранения, а приложение запишет `VPN_OFF.macro` с текущим `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`. Ожидаемые записи локального журнала: `MacroDroid macro save requested`, `MacroDroid macro saved`, `MacroDroid macro export cancelled` или безопасные сообщения восстановления для picker/template/output/write/permission failure.
 
 Импорт сохраненного `VPN_OFF.macro` проверен на реальном устройстве: MacroDroid принимает файл, сохраняет action с package/action/token extra и запускает FakeVpnBreaker после настройки нужных триггеров. Шаблон использует запуск через `TriggerActivity` и пример триггера запуска приложения `Пятёрочка`; после импорта добавьте или замените триггеры в MacroDroid под свой сценарий. Broadcast остается рекомендуемым фоновым вариантом для ручной настройки explicit intent.
 
@@ -50,10 +50,10 @@ Extra value: token shown on the FakeVpnBreaker main screen
 - **MacroDroid trigger** — экспортированный `TriggerReceiver` принимает Broadcast action `com.akfreedom.fakevpnbreaker.BREAK_VPN`; `TriggerActivity` остается вариантом запуска через экран, когда нужен системный VPN consent или Android блокирует фоновый старт.
 - **Token check** — внешний intent должен передать `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`.
 - **Sanitized trigger logs** — Broadcast и `TriggerActivity` логируют только категории action (`expected`, `missing`, `unsupported`), без raw action и токена.
-- **Macro template export** — кнопка `Save MacroDroid macro` сохраняет импортируемый `VPN_OFF.macro` с текущим токеном триггера.
+- **Macro template export** — кнопка `Сохранить макрос MacroDroid` / `Save MacroDroid macro` сохраняет импортируемый `VPN_OFF.macro` с текущим токеном триггера.
 - **Configurable hold duration** — допустимые значения: `300`, `500`, `1000`, `2000`, `5000 ms`.
 - **Routing modes** — `Full takeover` временно направляет весь трафик через FakeVpnBreaker, `Local only` запускает более узкий локальный VPN без общего маршрута.
-- **UI language selector** — переключение интерфейса между English и Russian.
+- **UI language selector** — переключение поля `Язык` / `Language` между `Английский` / `English` и `Русский` / `Russian`.
 - **Local event log** — последние 50 событий в `SharedPreferences`.
 
 ---
