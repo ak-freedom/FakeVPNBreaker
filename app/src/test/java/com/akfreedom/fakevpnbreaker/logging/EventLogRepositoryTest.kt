@@ -1,5 +1,6 @@
 package com.akfreedom.fakevpnbreaker.logging
 
+import java.util.TimeZone
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -28,5 +29,22 @@ class EventLogRepositoryTest {
 
         assertEquals(events, trimmed)
         assertTrue("Short event list must not be truncated", trimmed.size == 3)
+    }
+
+    @Test
+    fun displayFormattingUsesLocalizedEmptyText() {
+        assertEquals(
+            "Событий пока нет.",
+            EventLogRepository.formatForDisplay(emptyList(), "Событий пока нет.", TimeZone.getTimeZone("UTC")),
+        )
+    }
+
+    @Test
+    fun displayFormattingDoesNotTranslatePersistedMessages() {
+        val events = listOf(EventLog(0L, EventSeverity.Info, "Dummy VPN established"))
+
+        val formatted = EventLogRepository.formatForDisplay(events, "Событий пока нет.", TimeZone.getTimeZone("UTC"))
+
+        assertTrue(formatted.contains("Dummy VPN established"))
     }
 }

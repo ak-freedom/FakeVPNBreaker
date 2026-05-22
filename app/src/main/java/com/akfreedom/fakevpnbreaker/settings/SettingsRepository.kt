@@ -7,7 +7,7 @@ import com.akfreedom.fakevpnbreaker.logging.EventSeverity
 import java.util.UUID
 
 class SettingsRepository(
-    context: Context,
+    private val context: Context,
     private val eventLogRepository: EventLogRepository = EventLogRepository(context),
 ) {
     private val preferences: SharedPreferences =
@@ -17,14 +17,14 @@ class SettingsRepository(
         val stored = preferences.getString(KEY_BREAK_DURATION, null)
         val parsed = BreakDuration.fromName(stored)
         if (stored != null && stored != parsed.name) {
-            eventLogRepository.append(EventSeverity.Warn, "Invalid hold duration preference; using ${parsed.label}")
+            eventLogRepository.append(EventSeverity.Warn, "Invalid hold duration preference; using ${parsed.millis}ms")
         }
         return parsed
     }
 
     fun setBreakDuration(duration: BreakDuration) {
         preferences.edit().putString(KEY_BREAK_DURATION, duration.name).apply()
-        eventLogRepository.append(EventSeverity.Info, "Setting changed: holdDuration=${duration.label}")
+        eventLogRepository.append(EventSeverity.Info, "Setting changed: holdDuration=${duration.millis}ms")
     }
 
     fun getRoutingMode(): RoutingMode {
@@ -46,6 +46,12 @@ class SettingsRepository(
     fun setCloseAfterTrigger(enabled: Boolean) {
         preferences.edit().putBoolean(KEY_CLOSE_AFTER_TRIGGER, enabled).apply()
         eventLogRepository.append(EventSeverity.Info, "Setting changed: closeAfterTrigger=$enabled")
+    }
+
+    fun getAppLanguage(): AppLanguage = AppLanguageStorage.get(context)
+
+    fun setAppLanguage(language: AppLanguage) {
+        AppLanguageStorage.set(context, language)
     }
 
     fun getTriggerToken(): String {

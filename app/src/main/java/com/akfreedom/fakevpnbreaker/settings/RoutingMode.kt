@@ -1,8 +1,8 @@
 package com.akfreedom.fakevpnbreaker.settings
 
-enum class RoutingMode(val label: String) {
-    FullTakeover("Full takeover"),
-    LocalOnly("Local only");
+enum class RoutingMode {
+    FullTakeover,
+    LocalOnly;
 
     companion object {
         val Default = FullTakeover

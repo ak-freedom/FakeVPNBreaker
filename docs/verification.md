@@ -2,7 +2,7 @@
 
 # Manual Verification
 
-Эта страница содержит ручной чеклист для проверки APK, VPN flow, MacroDroid trigger и privacy boundaries.
+Эта страница содержит ручной чеклист для проверки APK, VPN-сценариев, триггера MacroDroid и privacy boundaries.
 
 ## Build and Install
 
@@ -15,15 +15,15 @@ Current release reference:
 
 | Field | Value |
 |-------|-------|
-| Latest tag at documentation update | `v1.0.3` |
-| APK asset | `FakeVpnBreaker-v1.0.3.apk` |
-| Release page | <https://github.com/ak-freedom/FakeVPNBreaker/releases/tag/v1.0.3> |
+| Latest tag at documentation update | `v1.1.0` |
+| APK asset | `FakeVpnBreaker-v1.1.0.apk` |
+| Release page | <https://github.com/ak-freedom/FakeVPNBreaker/releases/tag/v1.1.0> |
 
 ## Release APK Smoke Test
 
-1. Install `FakeVpnBreaker-v1.0.3.apk` from GitHub Releases.
+1. Install `FakeVpnBreaker-v1.1.0.apk` from GitHub Releases.
 2. Open Android app info for FakeVpnBreaker and confirm no internet permission is listed.
-3. Open the app and continue with the permission and VPN flow checks below.
+3. Open the app and continue with the permission, language, help-popup, and VPN checks below.
 
 ## First Launch and Permission
 
@@ -49,7 +49,14 @@ Current release reference:
 1. Select each supported duration: `300`, `500`, `1000`, `2000`, and `5000 ms`.
 2. Run a manual break after each selection and verify the session roughly matches the selected hold duration.
 3. Switch between `Full takeover` and `Local only`.
-4. Verify settings persist after closing and reopening the app.
+4. Open the help popup for hold duration, routing mode, close-after-trigger, and MacroDroid setup; confirm the text explains the effect of each setting without showing the trigger token.
+5. Verify settings persist after closing and reopening the app.
+
+## Language Selector
+
+1. Switch the UI language from English to Russian and back.
+2. Confirm headings, buttons, spinner labels, checkbox text, status text, help popup titles/messages, and the empty-log fallback are translated.
+3. Confirm existing local event log messages remain as originally recorded and are not rewritten during language switching.
 
 ## MacroDroid Trigger
 
@@ -60,7 +67,7 @@ Current release reference:
 5. Repeat the save flow and cancel the picker; verify the local log records `MacroDroid macro export cancelled` without an error state or crash.
 6. Import the saved `VPN_OFF.macro` into MacroDroid.
 7. Confirm the imported intent contains package `com.akfreedom.fakevpnbreaker`, action `com.akfreedom.fakevpnbreaker.BREAK_VPN`, extra name `com.akfreedom.fakevpnbreaker.EXTRA_TRIGGER_TOKEN`, and an extra value matching the current app token.
-8. Confirm the imported action target is `Activity`; the generated macro is the fallback-ready import path, not the recommended manual Broadcast setup.
+8. Confirm the imported action target is `Activity`; the generated macro uses the `TriggerActivity` import path, while manual Broadcast setup remains the recommended background option.
 9. Add the needed triggers for the target scenario, or edit the bundled example trigger app/package if reusing that trigger.
 10. Run the imported macro with another VPN active and verify the dummy VPN starts.
 11. Confirm the local log includes save requested/saved, sanitized trigger receipt, permission decision, service start delegated or service-start failure, dummy VPN closure, and no token, URI, raw exception message, or generated macro JSON.

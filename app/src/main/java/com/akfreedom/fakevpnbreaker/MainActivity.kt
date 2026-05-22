@@ -1,6 +1,7 @@
 package com.akfreedom.fakevpnbreaker
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -20,6 +21,9 @@ import com.akfreedom.fakevpnbreaker.logging.EventLogRepository
 import com.akfreedom.fakevpnbreaker.logging.EventSeverity
 import com.akfreedom.fakevpnbreaker.macrodroid.MacroTemplateRenderResult
 import com.akfreedom.fakevpnbreaker.macrodroid.MacroTemplateRenderer
+import com.akfreedom.fakevpnbreaker.settings.AppLanguage
+import com.akfreedom.fakevpnbreaker.settings.AppLanguageContext
+import com.akfreedom.fakevpnbreaker.settings.AppLanguageStorage
 import com.akfreedom.fakevpnbreaker.settings.BreakDuration
 import com.akfreedom.fakevpnbreaker.settings.RoutingMode
 import com.akfreedom.fakevpnbreaker.settings.SettingsRepository
@@ -32,16 +36,23 @@ class MainActivity : Activity() {
     private lateinit var settingsRepository: SettingsRepository
     private lateinit var eventLogRepository: EventLogRepository
     private lateinit var vpnBreakController: VpnBreakController
+    private lateinit var versionText: TextView
     private lateinit var statusText: TextView
     private lateinit var logText: TextView
     private lateinit var triggerActionText: TextView
     private lateinit var triggerTokenText: TextView
+    private lateinit var languageSpinner: Spinner
     private lateinit var durationSpinner: Spinner
     private lateinit var routingSpinner: Spinner
     private lateinit var closeAfterTriggerCheck: CheckBox
     private val mainHandler = Handler(Looper.getMainLooper())
     private val pendingLogRefreshes = mutableListOf<Runnable>()
     private var bindingSettings = false
+
+    override fun attachBaseContext(newBase: Context) {
+        val language = AppLanguageStorage.get(newBase)
+        super.attachBaseContext(AppLanguageContext.wrap(newBase, language))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,13 +63,16 @@ class MainActivity : Activity() {
         vpnBreakController = VpnBreakController(this, eventLogRepository)
 
         statusText = findViewById(R.id.statusText)
+        versionText = findViewById(R.id.versionText)
         logText = findViewById(R.id.logText)
         triggerActionText = findViewById(R.id.triggerActionText)
         triggerTokenText = findViewById(R.id.triggerTokenText)
+        languageSpinner = findViewById(R.id.languageSpinner)
         durationSpinner = findViewById(R.id.durationSpinner)
         routingSpinner = findViewById(R.id.routingSpinner)
         closeAfterTriggerCheck = findViewById(R.id.closeAfterTriggerCheck)
 
+        setupLanguageSpinner()
         setupDurationSpinner()
         setupRoutingSpinner()
         setupActions()
@@ -86,11 +100,26 @@ class MainActivity : Activity() {
         }
     }
 
+    private fun setupLanguageSpinner() {
+        languageSpinner.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            AppLanguage.entries.map { languageLabel(it) },
+        )
+        languageSpinner.onItemSelectedListener = SimpleItemSelectedListener {
+            if (bindingSettings) return@SimpleItemSelectedListener
+            val selectedLanguage = AppLanguage.entries[languageSpinner.selectedItemPosition]
+            if (selectedLanguage == settingsRepository.getAppLanguage()) return@SimpleItemSelectedListener
+            settingsRepository.setAppLanguage(selectedLanguage)
+            recreate()
+        }
+    }
+
     private fun setupDurationSpinner() {
         durationSpinner.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_dropdown_item,
-            BreakDuration.entries.map { it.label },
+            BreakDuration.entries.map { durationLabel(it) },
         )
         durationSpinner.onItemSelectedListener = SimpleItemSelectedListener {
             if (bindingSettings) return@SimpleItemSelectedListener
@@ -103,7 +132,7 @@ class MainActivity : Activity() {
         routingSpinner.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_dropdown_item,
-            RoutingMode.entries.map { it.label },
+            RoutingMode.entries.map { routingModeLabel(it) },
         )
         routingSpinner.onItemSelectedListener = SimpleItemSelectedListener {
             if (bindingSettings) return@SimpleItemSelectedListener
@@ -154,10 +183,27 @@ class MainActivity : Activity() {
         findViewById<Button>(R.id.saveMacroButton).setOnClickListener {
             requestMacroDocumentSave()
         }
+
+        findViewById<Button>(R.id.durationHelpButton).setOnClickListener {
+            showHelpDialog(R.string.duration_help_title, R.string.duration_help_message)
+        }
+
+        findViewById<Button>(R.id.routingHelpButton).setOnClickListener {
+            showHelpDialog(R.string.routing_help_title, R.string.routing_help_message)
+        }
+
+        findViewById<Button>(R.id.closeAfterTriggerHelpButton).setOnClickListener {
+            showHelpDialog(R.string.close_after_trigger_help_title, R.string.close_after_trigger_help_message)
+        }
+
+        findViewById<Button>(R.id.triggerHelpButton).setOnClickListener {
+            showHelpDialog(R.string.trigger_help_title, R.string.trigger_help_message)
+        }
     }
 
     private fun bindSettings() {
         bindingSettings = true
+        languageSpinner.setSelection(AppLanguage.entries.indexOf(settingsRepository.getAppLanguage()))
         durationSpinner.setSelection(BreakDuration.entries.indexOf(settingsRepository.getBreakDuration()))
         routingSpinner.setSelection(RoutingMode.entries.indexOf(settingsRepository.getRoutingMode()))
         closeAfterTriggerCheck.isChecked = settingsRepository.shouldCloseAfterTrigger()
@@ -166,14 +212,42 @@ class MainActivity : Activity() {
 
     private fun refreshUi() {
         val hasPermission = vpnBreakController.hasVpnPermission()
+        versionText.text = getString(R.string.version_label, currentVersionName())
         statusText.setText(if (hasPermission) R.string.status_permission_granted else R.string.status_permission_missing)
         triggerActionText.text = getString(R.string.trigger_action_value, TriggerToken.ACTION_BREAK_VPN)
         triggerTokenText.text = getString(R.string.trigger_token_value, settingsRepository.getTriggerToken())
-        logText.text = eventLogRepository.formatForDisplay()
+        logText.text = eventLogRepository.formatForDisplay(getString(R.string.no_events_yet))
     }
 
+    private fun currentVersionName(): String =
+        runCatching {
+            packageManager.getPackageInfo(packageName, 0).versionName ?: UNKNOWN_VERSION
+        }.getOrDefault(UNKNOWN_VERSION)
+
     private fun refreshLogs() {
-        logText.text = eventLogRepository.formatForDisplay()
+        logText.text = eventLogRepository.formatForDisplay(getString(R.string.no_events_yet))
+    }
+
+    private fun languageLabel(language: AppLanguage): String =
+        when (language) {
+            AppLanguage.English -> getString(R.string.language_english)
+            AppLanguage.Russian -> getString(R.string.language_russian)
+        }
+
+    private fun durationLabel(duration: BreakDuration): String = "${duration.millis} ms"
+
+    private fun routingModeLabel(mode: RoutingMode): String =
+        when (mode) {
+            RoutingMode.FullTakeover -> getString(R.string.routing_full_takeover)
+            RoutingMode.LocalOnly -> getString(R.string.routing_local_only)
+        }
+
+    private fun showHelpDialog(titleResId: Int, messageResId: Int) {
+        AlertDialog.Builder(this)
+            .setTitle(titleResId)
+            .setMessage(messageResId)
+            .setPositiveButton(R.string.help_dialog_ok, null)
+            .show()
     }
 
     private fun handleVpnPermissionResult() {
@@ -284,5 +358,6 @@ class MainActivity : Activity() {
         const val MACRO_DOCUMENT_NAME = "VPN_OFF.macro"
         const val MACRO_DOCUMENT_MIME_TYPE = "application/octet-stream"
         const val MACRO_TEMPLATE_ASSET = "macrodroid/VPN_OFF.template.macro"
+        const val UNKNOWN_VERSION = "unknown"
     }
 }

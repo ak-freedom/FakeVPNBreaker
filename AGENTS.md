@@ -36,10 +36,11 @@ app/                      # Android application module
       TriggerActivity.kt  # isolated Activity fallback для MacroDroid
       macrodroid/         # pure MacroDroid template rendering
       vpn/                # dummy VPN service и orchestration
-      settings/           # допустимые настройки и SharedPreferences repository
+      settings/           # допустимые настройки, язык UI и SharedPreferences repository
       logging/            # локальный ring buffer событий
     assets/macrodroid/    # bundled MacroDroid template asset
     res/                  # XML layout/theme/string resources
+      values-ru/          # русская локализация UI
   src/test/               # focused unit tests для pure Kotlin логики
 docs/
   getting-started.md      # релизный APK, установка и первый запуск
@@ -66,7 +67,16 @@ AGENTS.md                 # карта проекта для агентов
 | `app/src/main/java/com/akfreedom/fakevpnbreaker/TriggerReceiver.kt` | MacroDroid Broadcast entry point |
 | `app/src/main/java/com/akfreedom/fakevpnbreaker/TriggerActivity.kt` | MacroDroid Activity fallback |
 | `app/src/main/java/com/akfreedom/fakevpnbreaker/macrodroid/MacroTemplateRenderer.kt` | Pure renderer for bundled MacroDroid macro templates |
+| `app/src/main/java/com/akfreedom/fakevpnbreaker/settings/AppLanguage.kt` | Stable UI language model |
+| `app/src/main/java/com/akfreedom/fakevpnbreaker/settings/AppLanguageContext.kt` | Native Android locale context wrapper |
+| `app/src/main/java/com/akfreedom/fakevpnbreaker/settings/AppLanguageStorage.kt` | SharedPreferences storage for selected UI language |
 | `app/src/main/java/com/akfreedom/fakevpnbreaker/vpn/FakeVpnService.kt` | Dummy VPN lifecycle implementation |
+
+## Важные архитектурные правила
+
+- `BreakDuration` и `RoutingMode` остаются стабильными enum/storage values; пользовательские подписи строятся в UI из `R.string.*`.
+- Выбранный язык интерфейса хранится локально в `SharedPreferences` и применяется до `setContentView`.
+- Смена языка переводит UI labels, подсказки и empty-log fallback, но не изменяет уже сохраненные `EventLog.message` в локальном журнале.
 
 ## Документация
 

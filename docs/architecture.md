@@ -20,6 +20,9 @@ app/
         VpnBreakController.kt
         VpnNotification.kt
       settings/
+        AppLanguage.kt
+        AppLanguageContext.kt
+        AppLanguageStorage.kt
         BreakDuration.kt
         RoutingMode.kt
         SettingsRepository.kt
@@ -27,9 +30,14 @@ app/
       logging/
         EventLog.kt
         EventLogRepository.kt
+      macrodroid/
+        MacroTemplateRenderer.kt
+    assets/macrodroid/
+      VPN_OFF.template.macro
     res/
       layout/activity_main.xml
       values/strings.xml
+      values-ru/strings.xml
   src/test/
     java/com/akfreedom/fakevpnbreaker/
 ```
@@ -65,13 +73,14 @@ MainActivity, TriggerReceiver, or TriggerActivity
 |---------|----------------|
 | Hold duration | `300`, `500`, `1000`, `2000`, `5000 ms` |
 | Routing mode | `Full takeover`, `Local only` |
+| UI language | `English`, `Russian` |
 | Trigger token | Generated local token for MacroDroid intent validation |
 
-Settings are stored in `SharedPreferences` through `SettingsRepository`.
+Settings are stored in `SharedPreferences` through `SettingsRepository` and narrow helpers in `settings/`. `BreakDuration` and `RoutingMode` remain stable storage/domain enum values; localized labels are built in the UI from string resources. The selected UI language is applied before `setContentView` through the native Android `Configuration`/`Locale` path and changing it recreates `MainActivity`.
 
 ## Logging
 
-The local event log stores the latest 50 events in `SharedPreferences`.
+The local event log stores the latest 50 events in `SharedPreferences`. Existing persisted `EventLog.message` values are not translated when the user changes UI language; only the empty-log fallback text comes from localized UI resources.
 
 Allowed log content:
 

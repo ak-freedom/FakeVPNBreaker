@@ -66,7 +66,7 @@ class FakeVpnService : VpnService() {
         val routingMode = settingsRepository.getRoutingMode()
         eventLogRepository.append(
             EventSeverity.Debug,
-            "Starting dummy VPN session duration=${duration.label}, routingMode=${routingMode.name}",
+            "Starting dummy VPN session duration=${duration.millis}ms, routingMode=${routingMode.name}",
         )
 
         runCatching {

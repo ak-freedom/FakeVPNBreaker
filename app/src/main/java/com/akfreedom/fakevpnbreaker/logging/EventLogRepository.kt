@@ -31,12 +31,8 @@ class EventLogRepository(context: Context) {
         append(EventSeverity.Info, "Local event log cleared")
     }
 
-    fun formatForDisplay(): String {
-        val formatter = SimpleDateFormat("HH:mm:ss", Locale.US)
-        formatter.timeZone = TimeZone.getDefault()
-        return getNewestFirst().joinToString(separator = "\n") { event ->
-            "${formatter.format(Date(event.timestampMillis))} ${event.severity.name.uppercase(Locale.US)} ${event.message}"
-        }.ifBlank { "No events yet." }
+    fun formatForDisplay(emptyText: String): String {
+        return formatForDisplay(getNewestFirst(), emptyText, TimeZone.getDefault())
     }
 
     private fun readEventsOldestFirst(): List<EventLog> {
@@ -89,5 +85,13 @@ class EventLogRepository(context: Context) {
         private const val JSON_MESSAGE = "message"
 
         fun trimToLimit(events: List<EventLog>): List<EventLog> = events.takeLast(MAX_EVENTS)
+
+        fun formatForDisplay(eventsNewestFirst: List<EventLog>, emptyText: String, timeZone: TimeZone): String {
+            val formatter = SimpleDateFormat("HH:mm:ss", Locale.US)
+            formatter.timeZone = timeZone
+            return eventsNewestFirst.joinToString(separator = "\n") { event ->
+                "${formatter.format(Date(event.timestampMillis))} ${event.severity.name.uppercase(Locale.US)} ${event.message}"
+            }.ifBlank { emptyText }
+        }
     }
 }

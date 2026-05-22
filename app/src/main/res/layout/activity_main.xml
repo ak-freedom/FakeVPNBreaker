@@ -10,14 +10,30 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <TextView
-            android:id="@+id/titleText"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textColor="@color/text_primary"
-            android:textSize="26sp"
-            android:textStyle="bold" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/titleText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/app_name"
+                android:textColor="@color/text_primary"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/versionText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/statusText"
@@ -26,6 +42,21 @@
             android:layout_marginTop="14dp"
             android:textColor="@color/text_secondary"
             android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/language_label"
+            android:textColor="@color/text_primary"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/languageSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="6dp" />
 
         <Button
             android:id="@+id/permissionButton"
@@ -41,14 +72,31 @@
             android:layout_marginTop="10dp"
             android:text="@string/run_test" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="22dp"
-            android:text="@string/duration_label"
-            android:textColor="@color/text_primary"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/duration_label"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/durationHelpButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="@string/duration_help_accessibility"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:text="@string/help_button_text" />
+        </LinearLayout>
 
         <Spinner
             android:id="@+id/durationSpinner"
@@ -56,14 +104,31 @@
             android:layout_height="48dp"
             android:layout_marginTop="6dp" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/routing_label"
-            android:textColor="@color/text_primary"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/routing_label"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/routingHelpButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="@string/routing_help_accessibility"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:text="@string/help_button_text" />
+        </LinearLayout>
 
         <Spinner
             android:id="@+id/routingSpinner"
@@ -71,22 +136,63 @@
             android:layout_height="48dp"
             android:layout_marginTop="6dp" />
 
-        <CheckBox
-            android:id="@+id/closeAfterTriggerCheck"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/close_after_trigger"
-            android:textColor="@color/text_primary" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <TextView
+            <CheckBox
+                android:id="@+id/closeAfterTriggerCheck"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/close_after_trigger"
+                android:textColor="@color/text_primary" />
+
+            <Button
+                android:id="@+id/closeAfterTriggerHelpButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="@string/close_after_trigger_help_accessibility"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:text="@string/help_button_text" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="22dp"
-            android:text="@string/trigger_setup_label"
-            android:textColor="@color/text_primary"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/trigger_setup_label"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/triggerHelpButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="@string/trigger_help_accessibility"
+                android:minWidth="48dp"
+                android:minHeight="48dp"
+                android:text="@string/help_button_text" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/saveMacroButton"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="6dp"
+            android:text="@string/save_macrodroid_macro" />
 
         <TextView
             android:id="@+id/triggerActionText"
@@ -118,13 +224,6 @@
             android:layout_height="48dp"
             android:layout_marginTop="10dp"
             android:text="@string/copy_trigger_token" />
-
-        <Button
-            android:id="@+id/saveMacroButton"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="10dp"
-            android:text="@string/save_macrodroid_macro" />
 
         <Button
             android:id="@+id/clearLogsButton"
